@@ -24,7 +24,13 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       print(userCredential);
-      Get.offAllNamed('/dashboard', arguments: userCredential.user);
+      print(userCredential.user?.email);
+      print(userCredential.user?.uid);
+
+      Get.offAllNamed('/dashboard', arguments: {
+        'uid': userCredential.user?.uid,
+        'email': userCredential.user?.email,
+      });
 
       Get.snackbar(
         "Login",
@@ -60,13 +66,16 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // Check if user is already logged in
-  void _checkUserLogin() async {
-   User? user = _auth.currentUser;
-    if(user != null){
-      print("User is already logged in: ${user.email}");
-      Get.offAllNamed('/dashboard', arguments: user);
+    void _checkUserLogin() async {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        Get.offAllNamed('/dashboard', arguments: {
+          'uid': user.uid,
+          'email': user.email,
+        });
+        print(user.uid);
+      }
     }
-  }
 
   @override
   void initState() {

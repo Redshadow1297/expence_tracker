@@ -1,18 +1,22 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  const DashboardScreen({super.key,this.userID, this.emailID});
 
+  final String? userID;
+  final String? emailID;
+  
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
-  
+
   User? get currentUser => FirebaseAuth.instance.currentUser;
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-
   final List<Map<String, dynamic>> modules = [
     ///Temp. Added manually will get it from firebase directly
     {"title": "Profile", "icon": Icons.person},
@@ -37,6 +41,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return gradients.first;
   }
 
+  // Function to log the user out
+  void _logout(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      Get.snackbar(
+        "LogOut",
+        "You haved logged out !",
+        backgroundColor: Colors.yellowAccent,
+      );
+      Get.offAllNamed('/LoginPage');
+    } catch (e) {
+      Get.snackbar("error", "Error logging out: $e");
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,8 +76,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             InkWell(
               onTap: () {
-                // Get.off(() => LoginScreen());
-                Get.offAllNamed('/LoginPage');
+                _logout(context);
+                // Get.offAllNamed('/LoginPage');
               },
               child: Icon(Icons.logout_outlined, size: 33),
             ),
@@ -77,7 +97,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Card(
-              elevation: 4, 
+              elevation: 4,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
               ),
@@ -110,15 +130,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
         itemBuilder: (context, index) {
           return InkWell(
             onTap: () {
-              //Navigation to modules screen
-              Get.toNamed(
-                modules[index]['title'].toString().toLowerCase(),arguments: widget.currentUser!.uid);
-                // Get.toNamed(modules[index]['title'].toString().toLowerCase())?.then((_) {
-                //   setState(() {
-                //     _isNavigating = false;
-                //   });
-                // }) as String  
+              Future.delayed(Duration(milliseconds: 100), () {
+                try {
+                  Get.toNamed(
+                    modules[index]['title'].toString().toLowerCase(),
+                    arguments: widget.userID,
+                  );
+                  print("user Id for profile selected is:  ${widget.userID}"); 
+                } catch (e) {
+                  // Handle any errors that may occur during navigation
+                  print("Navigation error: $e");
+                }
+              });
             },
+
             child: buildModulesCard(
               modules[index]["title"],
               modules[index]["icon"],
@@ -131,9 +156,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget buildModulesCard(String moduleName, IconData icon) {
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       elevation: 4,
       child: Container(
         decoration: BoxDecoration(

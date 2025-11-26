@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class UserProfileScreen extends StatefulWidget {
-  const UserProfileScreen({super.key, required this.userID});
+  const UserProfileScreen({super.key, required this.userID, this.emailID});
   final String userID;
+  final String? emailID;
+
   @override
   State<UserProfileScreen> createState() => _UserProfileScreenState();
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
+
   DocumentSnapshot? userData;
   bool isLoading = true;
   String errorMessage = '';
@@ -44,6 +47,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     } catch (e) {
       setState(() {
         errorMessage = 'Failed to load user data: $e';
+        print("Error: $e");
         isLoading = false;
       });
     }
@@ -52,6 +56,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   void initState() {
     super.initState();
+    print("UserID : ${widget.userID}");
+    print("EmailID : ${widget.emailID}");
     getUserData();
   }
 
@@ -96,15 +102,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               rowForDataFields(
-                "First Name : ",
+                "First Name: ",
                 userData!['first_name'] ?? 'N/A',
               ),
-              rowForDataFields("Last Name : ", userData!['last_name'] ?? 'N/A'),
-              rowForDataFields("Email : ", userData!['email'] ?? 'N/A'),
-              rowForDataFields("Phone : ", userData!['mobileNumber'] ?? 'N/A'),
-              rowForDataFields("Address : ", userData!['address'] ?? 'N/A'),
+              rowForDataFields("Last Name: ", userData!['last_name'] ?? 'N/A'),
+              rowForDataFields("Email: ", userData!['email'] ?? 'N/A'),
+              rowForDataFields("Phone: ", userData!['mobileNumber'] ?? 'N/A'),
+              rowForDataFields("Address: ", userData!['address'] ?? 'N/A'),
               rowForDataFields(
-                "ID Number : ",
+                "ID Number: ",
                 userData!['adhaarNumber'] ?? 'N/A',
               ),
             ],
@@ -114,7 +120,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     }
   }
 
-  // Utility method for displaying rows of profile data
   Widget rowForDataFields(String fieldName, String fieldValue) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
