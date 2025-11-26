@@ -1,0 +1,52 @@
+import 'package:expence_tracker/AppScreens/dashboard_screen.dart';
+import 'package:expence_tracker/AppScreens/login_screen.dart';
+import 'package:expence_tracker/AppScreens/signIn_screen.dart';
+import 'package:expence_tracker/AppScreens/splash_screen.dart';
+import 'package:expence_tracker/DashboardModuleScreens/expenses_screen.dart';
+import 'package:expence_tracker/DashboardModuleScreens/profile_screen.dart';
+import 'package:expence_tracker/DashboardModuleScreens/reports_screen.dart';
+import 'package:expence_tracker/DashboardModuleScreens/roommates_memeber_screen.dart';
+import 'package:expence_tracker/DashboardModuleScreens/settings_screen.dart';
+import 'package:expence_tracker/DashboardModuleScreens/settlement_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get_navigation/get_navigation.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: FirebaseOptions(
+      apiKey: "AIzaSyD5_VjDfJ0vQiSXDBoEPlyA4VPekn0kS4E",
+      appId: '1:76096219944:android:e127e0b4da04f9623efe1d',
+      messagingSenderId: "76096219944",
+      projectId: "expensetracker-9d82c",
+    ),
+  );
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return GetMaterialApp(
+      initialRoute: '/Splashscreen',
+      getPages: [
+        GetPage(name: '/Splashscreen', page: () => ExpenseSplash()),
+        GetPage(name: '/LoginPage', page: () => LoginScreen()),
+        GetPage(name: '/signIn', page: () => SignUpScreen()),
+        GetPage(name: '/dashboard', page: () => DashboardScreen()),
+        GetPage(name: '/profile', page: () => UserProfileScreen()),
+        GetPage(name: '/expenses', page: () => ExpensesScreen()),
+        GetPage(name: '/roommates', page: () => RoomMembers()),
+        GetPage(name: '/settlements', page: () => SettlementsScreen()),
+        GetPage(name: '/reports', page: () => ReportsPage()),
+        GetPage(name: '/settings', page: () => Settings()),
+      ],
+      debugShowCheckedModeBanner: false,
+      home: ExpenseSplash(),
+    );
+  }
+}
