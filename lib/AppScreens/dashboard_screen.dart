@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -6,6 +7,8 @@ class DashboardScreen extends StatefulWidget {
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
+  
+  User? get currentUser => FirebaseAuth.instance.currentUser;
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
@@ -19,6 +22,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {"title": "Reports", "icon": Icons.bar_chart},
     {"title": "Settings", "icon": Icons.settings},
   ];
+  //  bool _isNavigating = false;
 
   LinearGradient getRandomGradient() {
     final gradients = [
@@ -45,7 +49,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 Text("Dashboard", style: TextStyle(color: Colors.white)),
                 Text(
-                  "Here you can manage your expenses and data",
+                  "Manage your modules and explore your data.",
                   style: TextStyle(fontSize: 12, color: Colors.white),
                 ),
               ],
@@ -66,57 +70,71 @@ class _DashboardScreenState extends State<DashboardScreen> {
           blue: 0.58,
         ),
       ),
-      body: SafeArea(
-        child: GridView.builder(
-          itemCount: modules.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-          ),
-          itemBuilder: (context, index) {
-            return InkWell(
-              onTap: () {
-                Get.toNamed(
-                  modules[index]['title'].toString().toLowerCase(),); //Navigation to modules screen
-              },
-              child: buildModulesCard(
-                modules[index]["title"],
-                modules[index]["icon"],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 2,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Card(
+              elevation: 4, 
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
               ),
-            );
-          },
-        ),
+              child: Text(
+                "Welcome to Your Dashboard!",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
+          buildGridsForModules(),
+        ],
       ),
     );
   }
 
   Widget buildGridsForModules() {
-    return GridView.builder(
-      itemCount: modules.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
+    return Expanded(
+      child: GridView.builder(
+        itemCount: modules.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+        itemBuilder: (context, index) {
+          return InkWell(
+            onTap: () {
+              //Navigation to modules screen
+              Get.toNamed(
+                modules[index]['title'].toString().toLowerCase(),arguments: widget.currentUser!.uid);
+                // Get.toNamed(modules[index]['title'].toString().toLowerCase())?.then((_) {
+                //   setState(() {
+                //     _isNavigating = false;
+                //   });
+                // }) as String  
+            },
+            child: buildModulesCard(
+              modules[index]["title"],
+              modules[index]["icon"],
+            ),
+          );
+        },
       ),
-      itemBuilder: (context, index) {
-        return InkWell(
-          onTap: () {
-            Get.toNamed(
-              modules[index]['title'].toString().toLowerCase(),
-            ); //Navigation to modules screen
-          },
-          child: buildModulesCard(
-            modules[index]["title"],
-            modules[index]["icon"],
-          ),
-        );
-      },
     );
   }
 
   Widget buildModulesCard(String moduleName, IconData icon) {
     return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      elevation: 4,
       child: Container(
         decoration: BoxDecoration(
           // gradient: SweepGradient(

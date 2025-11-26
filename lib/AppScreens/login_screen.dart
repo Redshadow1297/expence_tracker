@@ -14,7 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final FirebaseAuth _auth = FirebaseAuth.instance;
- 
+
 
   Future<void> getLoggedIn(String username, String password) async {
     try {
@@ -24,7 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       print(userCredential);
-      Get.offAllNamed('/dashboard',arguments: userCredential.user);
+      Get.offAllNamed('/dashboard', arguments: userCredential.user);
 
       Get.snackbar(
         "Login",
@@ -47,16 +47,32 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       } else {
         print("FirebaseAuth Error: ${e.message}");
-        Get.snackbar(
-          "Error",
-          e.message ?? "Unknown error",
-          backgroundColor: Colors.redAccent,
-        );
+        // Get.snackbar(
+        //   "Error",
+        //   e.message ?? "Unknown error",
+        //   backgroundColor: Colors.redAccent,
+        // );
       }
     } catch (ex) {
       print("Exception $ex");
-      Get.snackbar("Error", ex.toString());
+      // Get.snackbar("Error", ex.toString());
     }
+  }
+
+  // Check if user is already logged in
+  void _checkUserLogin() async {
+   User? user = _auth.currentUser;
+    if(user != null){
+      print("User is already logged in: ${user.email}");
+      Get.offAllNamed('/dashboard', arguments: user);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkUserLogin();
+    getLoggedIn(userNameController.text, passwordController.text);
   }
 
   @override
