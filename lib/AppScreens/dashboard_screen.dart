@@ -9,6 +9,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+
   final List<Map<String, dynamic>> modules = [
     ///Temp. Added manually will get it from firebase directly
     {"title": "Profile", "icon": Icons.person},
@@ -77,8 +78,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             return InkWell(
               onTap: () {
                 Get.toNamed(
-                  modules[index]['title'].toString().toLowerCase(),
-                ); //Navigation to modules screen
+                  modules[index]['title'].toString().toLowerCase(),); //Navigation to modules screen
               },
               child: buildModulesCard(
                 modules[index]["title"],

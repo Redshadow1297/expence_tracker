@@ -14,6 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+ 
 
   Future<void> getLoggedIn(String username, String password) async {
     try {
@@ -21,8 +22,9 @@ class _LoginScreenState extends State<LoginScreen> {
         email: username,
         password: password,
       );
+
       print(userCredential);
-      Get.offAllNamed('/dashboard');
+      Get.offAllNamed('/dashboard',arguments: userCredential.user);
 
       Get.snackbar(
         "Login",
