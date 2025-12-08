@@ -1,15 +1,10 @@
-import 'dart:convert';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key,this.userID, this.emailID});
+  const DashboardScreen({super.key});
 
-  final String? userID;
-  final String? emailID;
-  
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 
@@ -18,7 +13,6 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final List<Map<String, dynamic>> modules = [
-    ///Temp. Added manually will get it from firebase directly
     {"title": "Profile", "icon": Icons.person},
     {"title": "Expenses", "icon": Icons.receipt_long},
     {"title": "Roommates", "icon": Icons.group},
@@ -26,7 +20,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {"title": "Reports", "icon": Icons.bar_chart},
     {"title": "Settings", "icon": Icons.settings},
   ];
-  //  bool _isNavigating = false;
 
   LinearGradient getRandomGradient() {
     final gradients = [
@@ -41,115 +34,125 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return gradients.first;
   }
 
-  // Function to log the user out
   void _logout(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signOut();
-      Get.snackbar(
-        "LogOut",
-        "You haved logged out !",
-        backgroundColor: Colors.yellowAccent,
-      );
       Get.offAllNamed('/LoginPage');
+      Get.snackbar(
+        "Logged Out",
+        "You have successfully logged out!",
+        backgroundColor: Colors.amberAccent,
+      );
     } catch (e) {
-      Get.snackbar("error", "Error logging out: $e");
+      Get.snackbar("Error", "Error logging out: $e");
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        toolbarHeight: 80,
+        backgroundColor: Color.fromARGB(255, 9, 125, 148),
+        elevation: 4,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Dashboard", style: TextStyle(color: Colors.white)),
+                Text(
+                  "Dashboard",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4),
                 Text(
                   "Manage your modules and explore your data.",
-                  style: TextStyle(fontSize: 12, color: Colors.white),
+                  style: TextStyle(fontSize: 13, color: Colors.white70),
                 ),
               ],
             ),
             InkWell(
-              onTap: () {
-                _logout(context);
-                // Get.offAllNamed('/LoginPage');
-              },
-              child: Icon(Icons.logout_outlined, size: 33),
+              onTap: () => _logout(context),
+              borderRadius: BorderRadius.circular(30),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(Icons.logout_outlined, size: 30, color: Colors.white),
+              ),
             ),
           ],
         ),
-        backgroundColor: const Color.from(
-          alpha: 1,
-          red: 0.035,
-          green: 0.49,
-          blue: 0.58,
-        ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 2,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Text(
-                "Welcome to Your Dashboard!",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Welcome Card
+              Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
+                elevation: 4,
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: Colors.blue.shade50,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.dashboard, size: 40, color: Color.fromARGB(255, 9, 125, 148)),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          "Welcome to Your Dashboard!",
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
+              SizedBox(height: 20),
+              // Modules Grid
+              Expanded(
+                child: GridView.builder(
+                  itemCount: modules.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: () {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          try {
+                            Get.toNamed(
+                                modules[index]['title'].toString().toLowerCase());
+                          } catch (e) {
+                            print("Navigation error: $e");
+                          }
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(15),
+                      child: buildModulesCard(
+                          modules[index]["title"], modules[index]["icon"]),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 10),
-          buildGridsForModules(),
-        ],
-      ),
-    );
-  }
-
-  Widget buildGridsForModules() {
-    return Expanded(
-      child: GridView.builder(
-        itemCount: modules.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
         ),
-        itemBuilder: (context, index) {
-          return InkWell(
-            onTap: () {
-              Future.delayed(Duration(milliseconds: 100), () {
-                try {
-                  Get.toNamed(
-                    modules[index]['title'].toString().toLowerCase(),
-                    arguments: widget.userID,
-                  );
-                  print("user Id for profile selected is:  ${widget.userID}"); 
-                } catch (e) {
-                  // Handle any errors that may occur during navigation
-                  print("Navigation error: $e");
-                }
-              });
-            },
-
-            child: buildModulesCard(
-              modules[index]["title"],
-              modules[index]["icon"],
-            ),
-          );
-        },
       ),
     );
   }
@@ -160,23 +163,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
       elevation: 4,
       child: Container(
         decoration: BoxDecoration(
-          // gradient: SweepGradient(
-          //   colors: [Color(0xFF117972), Color(0xFF26DC9F), Color(0xFF43E8A3)],
-          // ),
           gradient: getRandomGradient(),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(15),
         ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Icon(icon, size: 36, color: Colors.white),
+              SizedBox(height: 8),
               Text(
                 moduleName,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+                textAlign: TextAlign.center,
               ),
-              SizedBox(height: 6),
-              Icon(icon, size: 30),
             ],
           ),
         ),

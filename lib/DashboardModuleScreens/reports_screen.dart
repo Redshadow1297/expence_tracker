@@ -10,6 +10,16 @@ class ReportsPage extends StatefulWidget {
 class _ReportsPageState extends State<ReportsPage> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+   return  Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.settings_accessibility, size: 100),
+            Text("Under Development !"),
+          ],
+        ),
+      ),
+    );
   }
 }

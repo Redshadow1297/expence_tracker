@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class RoomMembers extends StatefulWidget {
@@ -8,8 +9,112 @@ class RoomMembers extends StatefulWidget {
 }
 
 class _RoomMembersState extends State<RoomMembers> {
+  Future<List<Map<String, dynamic>>> getRoomMembers() async {
+    QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('users').get();
+
+    return snapshot.docs
+        .map((doc) => {'id': doc.id, ...doc.data() as Map<String, dynamic>})
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Text(
+              "Room Members",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              "Get the contacts of your room members here",
+              style: TextStyle(color: Colors.white70, fontSize: 12),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF097D94),
+        elevation: 4,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: FutureBuilder<List<Map<String, dynamic>>>(
+          future: getRoomMembers(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                  child: CircularProgressIndicator(color: Color(0xFF097D94)));
+            }
+
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(
+                  child: Text(
+                "No users found",
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ));
+            }
+
+            final members = snapshot.data!;
+
+            return ListView.builder(
+              itemCount: members.length,
+              itemBuilder: (context, index) {
+                final member = members[index];
+                return Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundImage: NetworkImage(
+                            member['profilePic'] ??
+                                'https://www.pngall.com/wp-content/uploads/5/Profile-Transparent.png',
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "${member['firstName']} ${member['lastName']}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Email: ${member['emailId'] ?? 'N/A'}",
+                                style: const TextStyle(
+                                    fontSize: 14, color: Colors.black87),
+                              ),
+                              Text(
+                                "Contact: ${member['mobileNumber'] ?? 'N/A'}",
+                                style: const TextStyle(
+                                    fontSize: 14, color: Colors.black87),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
   }
 }

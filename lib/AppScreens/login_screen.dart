@@ -23,10 +23,6 @@ class _LoginScreenState extends State<LoginScreen> {
         password: password,
       );
 
-      print(userCredential);
-      print(userCredential.user?.email);
-      print(userCredential.user?.uid);
-
       Get.offAllNamed('/dashboard', arguments: {
         'uid': userCredential.user?.uid,
         'email': userCredential.user?.email,
@@ -35,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Get.snackbar(
         "Login",
         "Successfully Logged In",
-        backgroundColor: Colors.yellowAccent,
+        backgroundColor: Colors.amberAccent,
         icon: Icon(Icons.done, size: 25),
       );
     } on FirebaseAuthException catch (e) {
@@ -45,11 +41,12 @@ class _LoginScreenState extends State<LoginScreen> {
           "Enter correct email",
           backgroundColor: Colors.redAccent,
         );
-      } else if (e.code == 'wrong-password') {
+      } 
+       if (e.code == 'wrong-password') {
         Get.snackbar(
           "Wrong Password",
           "Enter correct password",
-          backgroundColor: Colors.redAccent,
+          // backgroundColor: Colors.redAccent,
         );
       } else {
         print("FirebaseAuth Error: ${e.message}");
@@ -58,10 +55,15 @@ class _LoginScreenState extends State<LoginScreen> {
         //   e.message ?? "Unknown error",
         //   backgroundColor: Colors.redAccent,
         // );
+         Get.snackbar(
+          "Wrong credentials",
+          "Enter correct username or password",
+          backgroundColor: Colors.red[400]!,
+          icon: Icon(Icons.error, size: 25),
+        );
       }
     } catch (ex) {
-      print("Exception $ex");
-      // Get.snackbar("Error", ex.toString());
+      Get.snackbar("Error", ex.toString());
     }
   }
 
@@ -73,7 +75,6 @@ class _LoginScreenState extends State<LoginScreen> {
           'uid': user.uid,
           'email': user.email,
         });
-        print(user.uid);
       }
     }
 
@@ -81,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _checkUserLogin();
-    getLoggedIn(userNameController.text, passwordController.text);
+    // getLoggedIn(userNameController.text, passwordController.text);
   }
 
   @override

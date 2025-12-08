@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -21,79 +24,96 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final address = TextEditingController();
   final adharID = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  XFile? pickedImage;
+  final ImagePicker picker = ImagePicker();
+
+  Future<void> pickProfileImage() async {
+    final image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        pickedImage = image;
+      });
+    }
+  }
+
+  Future<String?> uploadProfilePic(String uid) async {
+    if (pickedImage == null) return null;
+    try {
+      final file = File(pickedImage!.path);
+      final bytes = await file.readAsBytes();
+      final ref = FirebaseStorage.instance.ref().child("profilePics/$uid.jpg");
+      await ref.putData(bytes, SettableMetadata(contentType: "image/jpeg"));
+      return await ref.getDownloadURL();
+    } catch (e) {
+      print("UPLOAD ERROR: $e");
+      return null;
+    }
+  }
 
   void verifyAadhaar() {
-    if (adharID.text.length != 12 ||
-        !RegExp(r'^[0-9]+$').hasMatch(adharID.text)) {
-      Get.snackbar(
-        "Aadhaar Verification Failed",
-        "Invalid Aadhaar Number. It should contain exactly 12 digits.",
-        // backgroundColor: Colors.redAccent,
-      );
+    if (adharID.text.length != 12 || !RegExp(r'^[0-9]+$').hasMatch(adharID.text)) {
+      Get.snackbar("Aadhaar Verification Failed", "Invalid Aadhaar Number. It should contain exactly 12 digits.");
     } else {
       Get.snackbar(
         "Verification Successful",
         "Aadhaar number is valid.",
-        backgroundColor: Colors.yellowAccent,
+        backgroundColor: Colors.amberAccent,
         icon: Icon(Icons.done, size: 25),
       );
     }
   }
 
   Future<void> submitForm(
-    String uFirstName,
-    String uLastName,
-    String uMailId,
-    String uPassword,
-    String uReTypedPassword,
-    String uMobileNumber,
-    String uAdharID,
-    String uAddress,
-  ) async {
+      String uFirstName,
+      String uLastName,
+      String uMailId,
+      String uPassword,
+      String uReTypedPassword,
+      String uMobileNumber,
+      String uAdharID,
+      String uAddress) async {
     try {
-      Get.dialog(
-        Center(child: CircularProgressIndicator()),
-        barrierDismissible: false,
-      );
+      Get.dialog(Center(child: CircularProgressIndicator()), barrierDismissible: false);
 
       UserCredential uc = await _auth.createUserWithEmailAndPassword(
         email: uMailId,
         password: uPassword,
       );
-
       User? user = uc.user;
 
-      await FirebaseFirestore.instance.collection('users').doc(user!.uid).set({
+      String? profileUrl = await uploadProfilePic(user!.uid);
+
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'firstName': uFirstName,
         'lastName': uLastName,
         'emailId': uMailId,
         'mobileNumber': uMobileNumber,
         'adhaarNumber': uAdharID,
         'address': uAddress,
+        'profilePic': profileUrl ?? "",
         'uId': user.uid,
-        'createdAt': FieldValue.serverTimestamp(), //server's current time
+        'createdAt': FieldValue.serverTimestamp(),
       });
 
       Get.back();
+      clearAllFields();
+      Get.offAllNamed('/LoginPage');
       Get.snackbar(
         "Success",
         "Account Created Successfully!",
-        backgroundColor: Colors.yellowAccent,
+        backgroundColor: Colors.amberAccent,
       );
-      clearAllFields();
-      Get.offAllNamed('/LoginPage');
     } on FirebaseAuthException catch (e) {
       Get.back();
       Get.snackbar(
         "Error",
         e.message ?? "Unknown error",
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Colors.red[400]!,
       );
     }
   }
 
-//Clearing All fields after submitting
-  void clearAllFields(){ 
+  void clearAllFields() {
     firstName.clear();
     lastName.clear();
     mailId.clear();
@@ -104,167 +124,111 @@ class _SignUpScreenState extends State<SignUpScreen> {
     address.clear();
   }
 
+  InputDecoration _inputDecoration(String hint, IconData prefixIcon) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: Icon(prefixIcon, color: Color.fromARGB(255, 9, 125, 148)),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 240, 245, 250),
       appBar: AppBar(
-        title: const Text(
-          "Register Yourself",
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: const Color.fromARGB(255, 2, 125, 148),
+        title: Text("Register Yourself", style: TextStyle(color: Colors.white)),
+        backgroundColor: Color.fromARGB(255, 9, 125, 148),
+        elevation: 4,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(16),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
-                const Text(
+                SizedBox(height: 20),
+                Text(
                   "Welcome To Legends Empire!",
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 2, 125, 148),
+                    color: Color.fromARGB(255, 9, 125, 148),
                   ),
                 ),
-                const SizedBox(height: 25),
+                SizedBox(height: 20),
 
-                TextFormField(
-                  controller: firstName,
-                  decoration: _inputDecoration("First Name", Icons.person),
-                  validator: (value) =>
-                      value!.isEmpty ? "Enter first name" : null,
-                ),
-                const SizedBox(height: 20),
-
-                TextFormField(
-                  controller: lastName,
-                  decoration: _inputDecoration("Last Name", Icons.abc),
-                  validator: (value) =>
-                      value!.isEmpty ? "Enter last name" : null,
-                ),
-                const SizedBox(height: 20),
-
-                TextFormField(
-                  controller: mailId,
-                  decoration: _inputDecoration("Email", Icons.email_outlined),
-                  validator: (value) {
-                    if (value!.isEmpty) return "Enter email";
-                    if (!RegExp(
-                      r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$",
-                    ).hasMatch(value)) {
-                      return "Enter valid email";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                TextFormField(
-                  controller: password,
-                  obscureText: true,
-                  decoration: _inputDecoration("Password", Icons.password),
-                  validator: (value) => value!.length < 6
-                      ? "Password must be 6 characters or more"
-                      : null,
-                ),
-                const SizedBox(height: 20),
-
-                /// Confirm Password
-                TextFormField(
-                  controller: reTypedPassword,
-                  obscureText: true,
-                  decoration: _inputDecoration(
-                    "Re-Type Password",
-                    Icons.lock_outline,
+                /// Profile Pic
+                Center(
+                  child: InkWell(
+                    onTap: pickProfileImage,
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.grey[300],
+                      backgroundImage: pickedImage != null ? FileImage(File(pickedImage!.path)) : null,
+                      child: pickedImage == null ? Icon(Icons.camera_alt, size: 40, color: Color.fromARGB(255, 9, 125, 148)) : null,
+                    ),
                   ),
-                  validator: (value) {
-                    if (value!.isEmpty) return "Re-enter password";
-                    if (value != password.text) return "Passwords do not match";
-                    return null;
-                  },
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
-                TextFormField(
-                  controller: mobileNumber,
-                  keyboardType: TextInputType.number,
-                  decoration: _inputDecoration("Mobile Number", Icons.phone),
-                  validator: (value) {
-                    if (value!.length != 10) {
-                      return "Enter 10-digit mobile number";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                TextFormField(
-                  controller: address,
-                  decoration: _inputDecoration(
-                    "Address",
-                    Icons.location_on_outlined,
-                  ),
-                  validator: (value) => value!.isEmpty ? "Enter address" : null,
-                ),
-                const SizedBox(height: 20),
+                // Input fields
+                TextFormField(controller: firstName, decoration: _inputDecoration("First Name", Icons.person), validator: (v) => v!.isEmpty ? "Enter first name" : null),
+                SizedBox(height: 15),
+                TextFormField(controller: lastName, decoration: _inputDecoration("Last Name", Icons.abc), validator: (v) => v!.isEmpty ? "Enter last name" : null),
+                SizedBox(height: 15),
+                TextFormField(controller: mailId, decoration: _inputDecoration("Email", Icons.email_outlined), validator: (v) {
+                  if (v!.isEmpty) return "Enter email";
+                  if (!RegExp(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$").hasMatch(v)) return "Enter valid email";
+                  return null;
+                }),
+                SizedBox(height: 15),
+                TextFormField(controller: password, obscureText: true, decoration: _inputDecoration("Password", Icons.password), validator: (v) => v!.length < 6 ? "Password must be 6 characters or more" : null),
+                SizedBox(height: 15),
+                TextFormField(controller: reTypedPassword, obscureText: true, decoration: _inputDecoration("Re-Type Password", Icons.lock_outline), validator: (v) {
+                  if (v!.isEmpty) return "Re-enter password";
+                  if (v != password.text) return "Passwords do not match";
+                  return null;
+                }),
+                SizedBox(height: 15),
+                TextFormField(controller: mobileNumber, keyboardType: TextInputType.number, decoration: _inputDecoration("Mobile Number", Icons.phone), validator: (v) {
+                  if (v!.length != 10) return "Enter 10-digit mobile number";
+                  return null;
+                }),
+                SizedBox(height: 15),
+                TextFormField(controller: address, decoration: _inputDecoration("Address", Icons.location_on_outlined), validator: (v) => v!.isEmpty ? "Enter address" : null),
+                SizedBox(height: 15),
 
                 Row(
                   children: [
                     Expanded(
-                      child: TextFormField(
-                        controller: adharID,
-                        keyboardType: TextInputType.number,
-                        decoration: _inputDecoration(
-                          "Aadhaar Number",
-                          Icons.credit_card,
-                        ),
-                        validator: (value) {
-                          if (value!.isEmpty) return "Enter Aadhaar number";
-                          if (value.length != 12) {
-                            return "Aadhaar must be 12 digits";
-                          }
-                          if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                            return "Only digits allowed";
-                          }
-                          return null;
-                        },
-                      ),
+                      child: TextFormField(controller: adharID, keyboardType: TextInputType.number, decoration: _inputDecoration("Aadhaar Number", Icons.credit_card), validator: (v) {
+                        if (v!.isEmpty) return "Enter Aadhaar number";
+                        if (v.length != 12) return "Aadhaar must be 12 digits";
+                        if (!RegExp(r'^[0-9]+$').hasMatch(v)) return "Only digits allowed";
+                        return null;
+                      }),
                     ),
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     InkWell(
                       onTap: verifyAadhaar,
+                      borderRadius: BorderRadius.circular(8),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
-                          ),
-                          // color: Color.from(
-                          //   alpha: 1,
-                          //   red: 0.035,
-                          //   green: 0.49,
-                          //   blue: 0.58,
-                          // ),
-                          borderRadius: BorderRadius.circular(8),
+                          gradient: LinearGradient(colors: [Color(0xFF6A11CB), Color(0xFF2575FC)]),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Text(
-                          "Verify",
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        child: Text("Verify", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                       ),
-                    ),
+                    )
                   ],
                 ),
-
-                const SizedBox(height: 40),
+                SizedBox(height: 30),
 
                 InkWell(
                   onTap: () {
@@ -281,45 +245,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       );
                     }
                   },
+                  borderRadius: BorderRadius.circular(10),
                   child: Container(
-                    height: 45,
+                    height: 50,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
-                      ),
-                      // color: Color.from(
-                      //   alpha: 1,
-                      //   red: 0.035,
-                      //   green: 0.49,
-                      //   blue: 0.58,
-                      // ),
+                      gradient: LinearGradient(colors: [Color(0xFF6A11CB), Color(0xFF2575FC)]),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Center(
-                      child: Text(
-                        "Submit Data",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
+                    child: Center(child: Text("Submit Data", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18))),
                   ),
                 ),
+                SizedBox(height: 30),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  InputDecoration _inputDecoration(String hint, IconData prefixIcon) {
-    return InputDecoration(
-      hintText: hint,
-      prefixIcon: Icon(prefixIcon),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
     );
   }
 }

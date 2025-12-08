@@ -32,13 +32,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      initialRoute: '/Splashscreen',
+      initialRoute: '/',
       getPages: [
         GetPage(name: '/Splashscreen', page: () => ExpenseSplash()),
         GetPage(name: '/LoginPage', page: () => LoginScreen()),
         GetPage(name: '/signIn', page: () => SignUpScreen()),
         GetPage(name: '/dashboard', page: () => DashboardScreen()),
-        GetPage(name: '/profile', page: () => UserProfileScreen(userID: '',)),
+        GetPage(name: '/profile', page: () => UserProfileScreen()),
         GetPage(name: '/expenses', page: () => ExpensesScreen()),
         GetPage(name: '/roommates', page: () => RoomMembers()),
         GetPage(name: '/settlements', page: () => SettlementsScreen()),
