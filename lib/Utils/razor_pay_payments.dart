@@ -16,7 +16,7 @@ class PaymentController {
   this.onSuccess = onSuccess;
   var options = {
     'key': 'rzp_test_Rp0NK7nOJ859cL',
-    'amount': amountInINR * 100,
+    'amount': amountInINR,
     'name': 'Expense Tracker',
     'description': 'Expense Payment',
     'prefill': {

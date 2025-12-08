@@ -121,7 +121,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           double totalSpent = filteredDocs.fold(
               0, (sum, doc) => sum + (doc['amount'] as num).toDouble());
 
-          final categoryTotals = calculateCategoryTotals(filteredDocs);
+          // final categoryTotals = calculateCategoryTotals(filteredDocs);
 
           return ListView(
             padding: const EdgeInsets.all(16),

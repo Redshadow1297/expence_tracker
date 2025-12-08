@@ -19,10 +19,11 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
   TextEditingController notesController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  bool _isPaid = false; // tracks if payment is done
+  bool _isPaid = false; 
 
   Future<void> addExpenses() async {
     try {
+      // Show loader
       Get.dialog(
         const Center(child: CircularProgressIndicator()),
         barrierDismissible: false,
@@ -30,7 +31,7 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
 
       User? user = _auth.currentUser;
       if (user == null) {
-        Get.back();
+        Get.back(); // close loader
         Get.snackbar(
           "Error",
           "User not logged in",
@@ -54,15 +55,22 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
           });
 
       Get.back(); // close loader
-      Get.back(); // go back to previous screen
       Get.snackbar(
         "Success",
         "Expense added successfully",
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
+
+      // Reset fields and payment status
+      setState(() {
+        titleController.clear();
+        amountController.clear();
+        notesController.clear();
+        _isPaid = false;
+      });
     } catch (e) {
-      Get.back();
+      Get.back(); // close loader if error occurs
       Get.snackbar(
         "Error",
         e.toString(),
