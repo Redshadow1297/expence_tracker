@@ -31,7 +31,7 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
 
       User? user = _auth.currentUser;
       if (user == null) {
-        Get.back(); // close loader
+        Get.back();
         Get.snackbar(
           "Error",
           "User not logged in",
@@ -41,23 +41,26 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
         return;
       }
 
+      // Save expense in Firestore
       await _firestore
           .collection('users')
           .doc(user.uid)
           .collection('expenses')
           .add({
-            'title': titleController.text,
-            'amount': double.parse(amountController.text),
-            'category': selectedCategory,
-            'date': selectedDate.toIso8601String(),
-            'notes': notesController.text,
-            'createdAt': FieldValue.serverTimestamp(),
-          });
+        'title': titleController.text,
+        'amount': double.parse(amountController.text),
+        'category': selectedCategory,
+        'date': selectedDate.toIso8601String(),
+        'notes': notesController.text,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      // Cloud Function triggers automatically to send SMS
 
       Get.back(); // close loader
       Get.snackbar(
         "Success",
-        "Expense added successfully",
+        "Expense added successfully and SMS sent!",
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
@@ -70,7 +73,7 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
         _isPaid = false;
       });
     } catch (e) {
-      Get.back(); // close loader if error occurs
+      Get.back();
       Get.snackbar(
         "Error",
         e.toString(),
@@ -104,7 +107,6 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            // Heading Card
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
@@ -124,14 +126,9 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
               ),
             ),
 
-            // Title Field
             _buildTextField(titleController, "Title"),
-
             const SizedBox(height: 16),
-
-            // Amount Field
             _buildTextField(amountController, "Amount", isNumber: true),
-
             const SizedBox(height: 16),
 
             // Category Dropdown
@@ -145,21 +142,12 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
                 child: DropdownButtonFormField<String>(
                   value: selectedCategory,
                   decoration: const InputDecoration(border: InputBorder.none),
-                  items:
-                      [
-                            "Food",
-                            "Travel",
-                            "Shopping",
-                            "Bills",
-                            "Entertainment",
-                            "Groceries",
-                            "Other",
-                          ]
-                          .map(
-                            (cat) =>
-                                DropdownMenuItem(value: cat, child: Text(cat)),
-                          )
-                          .toList(),
+                  items: [
+                    "Food", "Travel", "Shopping", "Bills",
+                    "Entertainment", "Groceries", "Other"
+                  ]
+                      .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
+                      .toList(),
                   onChanged: (value) {
                     setState(() => selectedCategory = value!);
                   },
@@ -188,19 +176,12 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
                 ),
                 elevation: 2,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 12,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.calendar_today_rounded,
-                        color: Colors.deepPurple,
-                      ),
+                      const Icon(Icons.calendar_today_rounded, color: Colors.deepPurple),
                       const SizedBox(width: 12),
-                      Text(
-                        "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
+                      Text("${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
                         style: const TextStyle(fontSize: 16),
                       ),
                     ],
@@ -210,10 +191,7 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
             ),
 
             const SizedBox(height: 16),
-
-            // Notes
             _buildTextField(notesController, "Notes", maxLines: 3),
-
             const SizedBox(height: 30),
 
             // Pay Button
@@ -231,10 +209,10 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
                 }
 
                 PaymentController().openCheckout(
-                  amountInINR: amount.toInt(), // send amount to Razorpay
+                  amountInINR: amount.toInt(),
                   onSuccess: () {
                     setState(() {
-                      _isPaid = true; // enable save button
+                      _isPaid = true; 
                     });
                   },
                 );
@@ -248,7 +226,7 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
               ),
               child: Text(
                 "Pay ₹${amountController.text.isEmpty ? '0' : amountController.text}",
-                style: TextStyle(fontSize: 18, color: Colors.white),
+                style: const TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),
 
@@ -256,9 +234,7 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
 
             // Save Button
             ElevatedButton(
-              onPressed: _isPaid
-                  ? addExpenses
-                  : null, // only enabled after payment
+              onPressed: _isPaid ? addExpenses : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: _isPaid ? Colors.deepPurple : Colors.grey,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -277,12 +253,8 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
     );
   }
 
-  Widget _buildTextField(
-    TextEditingController controller,
-    String label, {
-    bool isNumber = false,
-    int maxLines = 1,
-  }) {
+  Widget _buildTextField(TextEditingController controller, String label,
+      {bool isNumber = false, int maxLines = 1}) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 2,
