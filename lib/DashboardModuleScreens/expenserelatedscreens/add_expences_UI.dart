@@ -210,11 +210,12 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
 
                 PaymentController().openCheckout(
                   amountInINR: amount.toInt(),
+                  orderId: '',
                   onSuccess: () {
                     setState(() {
                       _isPaid = true; 
                     });
-                  },
+                  }, 
                 );
               },
               style: ElevatedButton.styleFrom(
