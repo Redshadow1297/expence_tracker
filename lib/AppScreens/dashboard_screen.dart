@@ -76,14 +76,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ],
             ),
-            InkWell(
-              onTap: () => _logout(context),
-              borderRadius: BorderRadius.circular(30),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(Icons.logout_outlined, size: 30, color: Colors.white),
-              ),
-            ),
+            // InkWell(
+            //   onTap: () => _logout(context),
+            //   borderRadius: BorderRadius.circular(30),
+            //   child: Padding(
+            //     padding: const EdgeInsets.all(8.0),
+            //     child: Icon(Icons.logout_outlined, size: 30, color: Colors.white),
+            //   ),
+            // ),
           ],
         ),
       ),

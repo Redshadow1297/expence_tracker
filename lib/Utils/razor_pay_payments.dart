@@ -71,19 +71,6 @@ class PaymentController {
     if (onSuccess != null) onSuccess!(); // notify UI
   }
 
-  // void openCheckout({required int amountInINR, VoidCallback? onSuccess}) {
-  //   this.onSuccess = onSuccess;
-  //   var options = {
-  //     'key': 'rzp_test_Rp0NK7nOJ859cL', // replace with your key
-  //     'amount': amountInINR * 100, // in paise
-  //     'name': 'Expense Tracker',
-  //     'description': 'Expense Payment',
-  //     'timeout': 300,
-  //     'prefill': {'contact': '9730028611', 'email': 'amolshinde1297@gmail.com'}
-  //   };
-  //   _razorpay.open(options);
-  // }
-
   void _handlePaymentError(PaymentFailureResponse response) {
     Get.snackbar(
       "Payment Failed",

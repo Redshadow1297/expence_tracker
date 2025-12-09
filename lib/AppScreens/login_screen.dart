@@ -1,4 +1,7 @@
+import 'package:expence_tracker/auth_BLoC/auth_bloc.dart';
+import 'package:expence_tracker/auth_BLoC/auth_event.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -14,7 +17,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  LoginBloc loginBloc = LoginBloc();
+  BlocProvider? blocProvider;
 
   Future<void> getLoggedIn(String username, String password) async {
     try {
@@ -23,10 +27,13 @@ class _LoginScreenState extends State<LoginScreen> {
         password: password,
       );
 
-      Get.offAllNamed('/dashboard', arguments: {
-        'uid': userCredential.user?.uid,
-        'email': userCredential.user?.email,
-      });
+      Get.offAllNamed(
+        '/dashboard',
+        arguments: {
+          'uid': userCredential.user?.uid,
+          'email': userCredential.user?.email,
+        },
+      );
 
       Get.snackbar(
         "Login",
@@ -41,8 +48,8 @@ class _LoginScreenState extends State<LoginScreen> {
           "Enter correct email",
           backgroundColor: Colors.redAccent,
         );
-      } 
-       if (e.code == 'wrong-password') {
+      }
+      if (e.code == 'wrong-password') {
         Get.snackbar(
           "Wrong Password",
           "Enter correct password",
@@ -55,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
         //   e.message ?? "Unknown error",
         //   backgroundColor: Colors.redAccent,
         // );
-         Get.snackbar(
+        Get.snackbar(
           "Wrong credentials",
           "Enter correct username or password",
           backgroundColor: Colors.red[400]!,
@@ -68,15 +75,15 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // Check if user is already logged in
-    void _checkUserLogin() async {
-      User? user = _auth.currentUser;
-      if (user != null) {
-        Get.offAllNamed('/dashboard', arguments: {
-          'uid': user.uid,
-          'email': user.email,
-        });
-      }
+  void _checkUserLogin() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      Get.offAllNamed(
+        '/dashboard',
+        arguments: {'uid': user.uid, 'email': user.email},
+      );
     }
+  }
 
   @override
   void initState() {
@@ -174,6 +181,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           userNameController.text.trim(),
                           passwordController.text.trim(),
                         );
+                        // BlocProvider.of<LoginBloc>(
+                        //   context,
+                        // ).add(LoginButtonPressed(email: '', password: ''));
                       }
                     },
                     child: Container(
