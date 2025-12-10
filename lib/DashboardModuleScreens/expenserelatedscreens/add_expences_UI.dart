@@ -56,7 +56,6 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
       });
 
       // Cloud Function triggers automatically to send SMS
-
       Get.back(); // close loader
       Get.snackbar(
         "Success",

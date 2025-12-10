@@ -33,21 +33,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     gradients.shuffle();
     return gradients.first;
   }
-
-  void _logout(BuildContext context) async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      Get.offAllNamed('/LoginPage');
-      Get.snackbar(
-        "Logged Out",
-        "You have successfully logged out!",
-        backgroundColor: Colors.amberAccent,
-      );
-    } catch (e) {
-      Get.snackbar("Error", "Error logging out: $e");
-    }
-  }
-
+  // void _logout(BuildContext context) async {
+  //   try {
+  //     await FirebaseAuth.instance.signOut();
+  //     Get.offAllNamed('/LoginPage');
+  //     Get.snackbar(
+  //       "Logged Out",
+  //       "You have successfully logged out!",
+  //       backgroundColor: Colors.amberAccent,
+  //     );
+  //   } catch (e) {
+  //     Get.snackbar("Error", "Error logging out: $e");
+  //   }
+  // }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

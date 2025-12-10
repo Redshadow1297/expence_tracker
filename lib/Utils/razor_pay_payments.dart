@@ -13,32 +13,6 @@ class PaymentController {
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
   }
 
-  //   void openCheckout({required int amountInINR, VoidCallback? onSuccess}) {
-  //   this.onSuccess = onSuccess;
-  //   var options = {
-  //     'key': 'rzp_test_Rp0NK7nOJ859cL',
-  //     'amount': amountInINR,
-  //     'name': 'Expense Tracker',
-  //     'description': 'Expense Payment',
-  //     'prefill': {
-  //       'contact': '9730028611',
-  //       'email': 'amolshinde1297@gmail.com',
-  //     },
-  //     'method': {
-  //         'upi': true,
-  //         'card': true,
-  //         'netbanking': true,
-  //         'wallet': true,
-  //       }
-  //   };
-  //   _razorpay.open(options);
-  //   try {
-  //     _razorpay.open(options);
-  //   } catch (e) {
-  //     debugPrint("Error opening Razorpay: $e");
-  //   }
-  // }
-
   void openCheckout({
     required int amountInINR,
     required String orderId,
