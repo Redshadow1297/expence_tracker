@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_ai_chatbot/flutter_ai_chatbot.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -20,6 +21,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {"title": "Reports", "icon": Icons.bar_chart},
     {"title": "Settings", "icon": Icons.settings},
   ];
+  
+  set welcomeText(String welcomeText) {
+    // This is a placeholder setter for welcomeText.
+    // The actual implementation would depend on the ChatBotWidget's API. 
+    welcomeText = welcomeText;
+    
+  }
 
   LinearGradient getRandomGradient() {
     final gradients = [
@@ -33,6 +41,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     gradients.shuffle();
     return gradients.first;
   }
+
   // void _logout(BuildContext context) async {
   //   try {
   //     await FirebaseAuth.instance.signOut();
@@ -63,9 +72,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Text(
                   "Dashboard",
                   style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold),
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 SizedBox(height: 4),
                 Text(
@@ -74,82 +84,102 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ],
             ),
-            // InkWell(
-            //   onTap: () => _logout(context),
-            //   borderRadius: BorderRadius.circular(30),
-            //   child: Padding(
-            //     padding: const EdgeInsets.all(8.0),
-            //     child: Icon(Icons.logout_outlined, size: 30, color: Colors.white),
-            //   ),
-            // ),
           ],
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              // Welcome Card
-              Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15)),
-                elevation: 4,
-                child: Container(
-                  padding: EdgeInsets.all(16),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: Colors.blue.shade50,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.dashboard, size: 40, color: Color.fromARGB(255, 9, 125, 148)),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          "Welcome to Your Dashboard!",
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              // Modules Grid
-              Expanded(
-                child: GridView.builder(
-                  itemCount: modules.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          try {
-                            Get.toNamed(
-                                modules[index]['title'].toString().toLowerCase());
-                          } catch (e) {
-                            print("Navigation error: $e");
-                          }
-                        });
-                      },
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Card(
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
-                      child: buildModulesCard(
-                          modules[index]["title"], modules[index]["icon"]),
-                    );
-                  },
+                    ),
+                    elevation: 4,
+                    child: Container(
+                      padding: EdgeInsets.all(16),
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.blue.shade50,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.dashboard,
+                            size: 40,
+                            color: Color.fromARGB(255, 9, 125, 148),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              "Welcome to Your Dashboard!",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 20),
+
+                  // Modules Grid
+                  Expanded(
+                    child: GridView.builder(
+                      itemCount: modules.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      itemBuilder: (context, index) {
+                        return InkWell(
+                          onTap: () {
+                            Get.toNamed(
+                              modules[index]['title'].toString().toLowerCase(),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(15),
+                          child: buildModulesCard(
+                            modules[index]["title"],
+                            modules[index]["icon"],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Positioned(
+              bottom: 20,
+              right: 20,
+              child: SizedBox(
+                height: 200,
+                width: 150,
+                child: ChatBotWidget(
+                  apiKey: 'AIzaSyBOFiwEG4iveydThdNCtM_-MPC93ZVXVNY', 
+                  aiService:
+                      AIService.gemini,
+                  initialMessage: welcomeText = "👋 Hi! I’m here to help you with expenses, reports, and settings.",
+                  primaryColor: Color(0xFF097D94),
+                  chatIcon: Icons.chat, 
+                  clearHistoryOnClose: true,
+                  headerTitle: 'My Chattee',
+                  headerIcon: Icons.smart_toy,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -173,9 +203,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Text(
                 moduleName,
                 style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],

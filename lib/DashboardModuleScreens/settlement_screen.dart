@@ -9,14 +9,21 @@ class SettlementsScreen extends StatefulWidget {
 }
 
 class _SettlementsScreenState extends State<SettlementsScreen> {
-  Future<Map<String, dynamic>> fetchAllExpenseData() async {
+  Future<Map<String, Map<String, dynamic>>> fetchAllExpenseData() async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     QuerySnapshot snapshot = await firestore.collection('expenses').get();
 
-    Map<String, dynamic> allExpenses = {};
+    Map<String, Map<String, dynamic>> allExpenses = {};
 
     for (var doc in snapshot.docs) {
-      allExpenses[doc.id] = doc.data();
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+      // Convert Timestamp to DateTime if necessary
+      if (data['createdAt'] != null && data['createdAt'] is Timestamp) {
+        data['createdAt'] = (data['createdAt'] as Timestamp).toDate();
+      }
+
+      allExpenses[doc.id] = data;
     }
 
     return allExpenses;
@@ -66,26 +73,57 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
 
   Widget _allExpencesList() {
     return Expanded(
-      child: FutureBuilder<Map<String, dynamic>>(
-        future: fetchAllExpenseData(),
+      child: FutureBuilder<QuerySnapshot>(
+        future: FirebaseFirestore.instance.collection('expenses').get(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(child: Text('No expenses found.'));
           } else {
-            final expenses = snapshot.data!;
+            final expenseDocs = snapshot.data!.docs;
+
             return ListView.builder(
-              itemCount: expenses.length,
+              itemCount: expenseDocs.length,
               itemBuilder: (context, index) {
-                // final expenseId = expenses.keys.elementAt(index);
-                // final expenseData = expenses[expenseId];
-                return ListTile(
-                  title: Text('Expense Item ${index + 1}'),
-                  subtitle: Text('Date: ${expenses['date']}'),
-                  trailing: Text('Amount: \$${expenses['amount']}'),
+                final expense =
+                    expenseDocs[index].data() as Map<String, dynamic>;
+                final amount = expense['amount'] ?? 'N/A';
+                final category = expense['category'] ?? 'N/A';
+                final date = expense['createdAt'] != null
+                    ? (expense['createdAt'] is Timestamp
+                          ? (expense['createdAt'] as Timestamp).toDate()
+                          : expense['createdAt'])
+                    : '';
+
+                final uId = expense['uId'];
+
+                // Use FutureBuilder to get user details for each expense
+                return FutureBuilder<DocumentSnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(uId)
+                      .get(),
+                  builder: (context, userSnapshot) {
+                    if (!userSnapshot.hasData) {
+                      return ListTile(
+                        title: Text('Loading user...'),
+                        subtitle: Text('Category: $category\nDate: $date'),
+                        trailing: Text('Amount: $amount'),
+                      );
+                    }
+                    final user =
+                        userSnapshot.data!.data() as Map<String, dynamic>;
+                    final fullName = '${user['firstName']} ${user['lastName']}';
+
+                    return ListTile(
+                      title: Text(fullName),
+                      subtitle: Text('Category: $category\nDate: $date'),
+                      trailing: Text('Amount: $amount'),
+                    );
+                  },
                 );
               },
             );
