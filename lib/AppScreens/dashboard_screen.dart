@@ -35,8 +35,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       LinearGradient(colors: [Color(0xFF26C6DA), Color(0xFF00ACC1)]),
       LinearGradient(colors: [Color.fromARGB(255, 134, 173, 201), Color(0xFF0396FF)]),
       LinearGradient(colors: [Color(0xFFFF9A8B), Color(0xFFFF6A88)]),
-      LinearGradient(colors: [Color.fromARGB(255, 99, 153, 151), Color(0xFF00FFCC)]),
-      LinearGradient(colors: [Color.fromARGB(255, 140, 141, 136), Color.fromARGB(255, 120, 234, 175)]),
+      LinearGradient(colors: [Color.fromARGB(255, 137, 207, 204), Color(0xFF00FFCC)]),
+      LinearGradient(colors: [Color.fromARGB(255, 193, 196, 181), Color.fromARGB(255, 149, 235, 191)]),
     ];
     gradients.shuffle();
     return gradients.first;
