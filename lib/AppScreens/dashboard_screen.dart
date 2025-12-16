@@ -130,6 +130,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           onTap: () {
                             Get.toNamed(
                               modules[index]['title'].toString().toLowerCase(),
+                              preventDuplicates: true
                             );
                           },
                           borderRadius: BorderRadius.circular(15),

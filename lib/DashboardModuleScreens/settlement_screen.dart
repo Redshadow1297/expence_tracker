@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expence_tracker/model/settlement_model.dart';
 import 'package:flutter/material.dart';
 
 class SettlementsScreen extends StatefulWidget {
@@ -66,77 +67,159 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
 
         final expenseDocs = snapshot.data!.docs;
 
-        return ListView.builder(
-          itemCount: expenseDocs.length,
-          itemBuilder: (context, index) {
-            final expense =
-                expenseDocs[index].data() as Map<String, dynamic>;
+        return Column(
+          children: [
+            Expanded(child: expensesList(expenseDocs)),
+            const SizedBox(height: 8),
+            _settlementCard(expenseDocs),
+          ],
+        );
+      },
+    );
+  }
 
-            final amount = expense['amount'] ?? 0;
-            final category = expense['category'] ?? 'N/A';
+  Widget expensesList(List<QueryDocumentSnapshot> expenseDocs) {
+    return ListView.builder(
+      itemCount: expenseDocs.length,
+      itemBuilder: (context, index) {
+        final expense = expenseDocs[index].data() as Map<String, dynamic>;
+        final amount = expense['amount'] ?? 0;
+        final category = expense['category'] ?? 'N/A';
+        final Timestamp? timestamp = expense['createdAt'];
+        final DateTime? date = timestamp?.toDate();
+        final String? uId = expense['uId'];
 
-            final Timestamp? timestamp = expense['createdAt'];
-            final DateTime? date =
-                timestamp?.toDate();
+        if (uId == null) return const SizedBox();
 
-            final String? uId = expense['uId'];
-
-            // Safety check
-            if (uId == null) {
-              return ListTile(
-                title: const Text('Unknown User'),
-                subtitle: Text(
-                  'Category: $category\nDate: ${date ?? 'N/A'}',
-                ),
-                trailing: Text('₹$amount'),
-              );
+        return FutureBuilder<DocumentSnapshot>(
+          future: FirebaseFirestore.instance.collection('users').doc(uId).get(),
+          builder: (context, userSnapshot) {
+            if (!userSnapshot.hasData) {
+              return const ListTile(title: Text('Loading...'));
             }
 
-            return FutureBuilder<DocumentSnapshot>(
-              future: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(uId)
-                  .get(),
-              builder: (context, userSnapshot) {
-                if (!userSnapshot.hasData) {
-                  return const ListTile(
-                    title: Text('Loading user...'),
-                  );
-                }
+            final user = userSnapshot.data!.data() as Map<String, dynamic>;
 
-                if (!userSnapshot.data!.exists) {
-                  return const ListTile(
-                    title: Text('User not found'),
-                  );
-                }
+            final fullName =
+                '${user['firstName'] ?? ''} ${user['lastName'] ?? ''}';
 
-                final user =
-                    userSnapshot.data!.data() as Map<String, dynamic>;
-
-                final fullName =
-                    '${user['firstName'] ?? ''} ${user['lastName'] ?? ''}';
-
-                return Card(
-                  elevation: 3,
-                  child: ListTile(
-                    horizontalTitleGap: 10,
-                    title: Text(fullName,style: TextStyle(fontWeight: FontWeight.bold),),
-                    subtitle: Text(
-                      'Category: $category\nDate: ${date != null ? date.toString().split(' ')[0] : 'N/A'}',
-                    ),
-                    trailing: Text(
-                      '₹$amount',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                );
-              },
+            return Card(
+              elevation: 3,
+              child: ListTile(
+                title: Text(
+                  fullName,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  'Category: $category\nDate: ${date != null ? date.toString().split(' ')[0] : 'N/A'}',
+                ),
+                trailing: Text(
+                  '₹$amount',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
             );
           },
         );
       },
+    );
+  }
+
+  Widget _settlementCard(List<QueryDocumentSnapshot> docs) {
+    Map<String, double> paidByUser = {};
+    Set<String> userIds = {};
+    double total = 0;
+
+    for (var doc in docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final uId = data['uId'];
+      final amount = (data['amount'] ?? 0).toDouble();
+
+      if (uId == null) continue;
+
+      paidByUser[uId] = (paidByUser[uId] ?? 0) + amount;
+      userIds.add(uId);
+      total += amount;
+    }
+
+    if (userIds.isEmpty) return const SizedBox();
+
+    final double share = total / userIds.length;
+
+    Map<String, double> balance = {};
+    for (var uId in userIds) {
+      balance[uId] = (paidByUser[uId] ?? 0) - share;
+    }
+
+    List<Settlement> settlements = [];
+
+    final debtors = balance.entries.where((e) => e.value < 0).toList();
+    final creditors = balance.entries.where((e) => e.value > 0).toList();
+
+    for (var d in debtors) {
+      double debt = -d.value;
+
+      for (var c in creditors) {
+        if (debt <= 0 || c.value <= 0) continue;
+
+        final pay = debt < c.value ? debt : c.value;
+
+        settlements.add(Settlement(d.key, c.key, pay));
+
+        debt -= pay;
+        balance[c.key] = c.value - pay;
+      }
+    }
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Settlements",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const Divider(),
+            ...settlements.map((s) {
+              return FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(s.from)
+                    .get(),
+                builder: (context, fromSnap) {
+                  if (!fromSnap.hasData) return const SizedBox();
+
+                  final fromUser =
+                      fromSnap.data!.data() as Map<String, dynamic>;
+
+                  return FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(s.to)
+                        .get(),
+                    builder: (context, toSnap) {
+                      if (!toSnap.hasData) return const SizedBox();
+
+                      final toUser =
+                          toSnap.data!.data() as Map<String, dynamic>;
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text(
+                          "${fromUser['firstName']} pays ₹${s.amount.toStringAsFixed(2)} to ${toUser['firstName']}",
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            }).toList(),
+          ],
+        ),
+      ),
     );
   }
 }
