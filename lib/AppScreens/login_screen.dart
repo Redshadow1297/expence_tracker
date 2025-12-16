@@ -94,6 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 240, 245, 250),
       appBar: AppBar(
         title: Text("Expense Tracker", style: TextStyle(color: Colors.white)),
         backgroundColor: const Color.from(

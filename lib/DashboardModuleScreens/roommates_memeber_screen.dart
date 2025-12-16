@@ -22,7 +22,7 @@ class _RoomMembersState extends State<RoomMembers> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color.fromARGB(255, 240, 245, 250),
       appBar: AppBar(
         automaticallyImplyLeading: true,
         title: Column(

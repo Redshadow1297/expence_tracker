@@ -33,10 +33,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final gradients = [
       LinearGradient(colors: [Color(0xFF6a85b6), Color(0xFFbac8e0)]),
       LinearGradient(colors: [Color(0xFF26C6DA), Color(0xFF00ACC1)]),
-      LinearGradient(colors: [Color(0xFFABDCFF), Color(0xFF0396FF)]),
+      LinearGradient(colors: [Color.fromARGB(255, 134, 173, 201), Color(0xFF0396FF)]),
       LinearGradient(colors: [Color(0xFFFF9A8B), Color(0xFFFF6A88)]),
-      LinearGradient(colors: [Color(0xFFB5FFFC), Color(0xFF00FFCC)]),
-      LinearGradient(colors: [Color(0xFFFAFFD1), Color(0xFFA1FFCE)]),
+      LinearGradient(colors: [Color.fromARGB(255, 99, 153, 151), Color(0xFF00FFCC)]),
+      LinearGradient(colors: [Color.fromARGB(255, 140, 141, 136), Color.fromARGB(255, 120, 234, 175)]),
     ];
     gradients.shuffle();
     return gradients.first;
@@ -58,7 +58,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color.fromARGB(255, 240, 245, 250),
       appBar: AppBar(
         toolbarHeight: 80,
         backgroundColor: Color.fromARGB(255, 9, 125, 148),
@@ -173,7 +173,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   initialMessage: welcomeText = "👋 Hi! I’m here to help you with expenses, reports, and settings.",
                   primaryColor: Color(0xFF097D94),
                   chatIcon: Icons.chat, 
-                  clearHistoryOnClose: true,
+                  clearHistoryOnClose: false,
                   headerTitle: 'My Chattee',
                   headerIcon: Icons.smart_toy,
                 ),

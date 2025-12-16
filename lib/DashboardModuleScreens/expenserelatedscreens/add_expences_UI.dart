@@ -19,68 +19,66 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
   TextEditingController notesController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  bool _isPaid = false; 
+  bool _isPaid = false;
 
   Future<void> addExpenses() async {
     try {
       // Show loader
-      Get.dialog(
-        const Center(child: CircularProgressIndicator()),
-        barrierDismissible: false,
+      // Get.dialog(
+      //   const Center(child: CircularProgressIndicator()),
+      //   barrierDismissible: false,
+      // );
+      Get.showOverlay(
+        asyncFunction: () async {
+          // firestore save here
+        },
+        loadingWidget: const Center(child: CircularProgressIndicator()),
       );
 
       User? user = _auth.currentUser;
       if (user == null) {
-        Get.back();
-        Get.snackbar(
-          "Error",
-          "User not logged in",
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-        return;
+        throw Exception("User not logged in");
       }
 
-      // Save expense in Firestore
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('expenses')
-          .add({
-        'title': titleController.text,
+      await _firestore.collection('expenses').add({
+        'title': titleController.text.trim(),
         'amount': double.parse(amountController.text),
         'category': selectedCategory,
-        'date': selectedDate.toIso8601String(),
-        'notes': notesController.text,
+        'notes': notesController.text.trim(),
         'createdAt': FieldValue.serverTimestamp(),
+        'expenseDate': selectedDate,
+        'uId': user.uid,
       });
 
-      // Cloud Function triggers automatically to send SMS
-      Get.back(); // close loader
       Get.snackbar(
         "Success",
-        "Expense added successfully and SMS sent!",
+        "Expense added successfully",
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
 
-      // Reset fields and payment status
       setState(() {
         titleController.clear();
         amountController.clear();
         notesController.clear();
+        selectedCategory = "Food";
+        selectedDate = DateTime.now();
         _isPaid = false;
       });
     } catch (e) {
-      Get.back();
       Get.snackbar(
         "Error",
         e.toString(),
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+    } finally {
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
     }
   }
+
 
   @override
   void initState() {
@@ -93,7 +91,7 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Color.fromARGB(255, 240, 245, 250),
       appBar: AppBar(
         backgroundColor: const Color(0xFF097D94),
         elevation: 4,
@@ -141,12 +139,21 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
                 child: DropdownButtonFormField<String>(
                   value: selectedCategory,
                   decoration: const InputDecoration(border: InputBorder.none),
-                  items: [
-                    "Food", "Travel", "Shopping", "Bills",
-                    "Entertainment", "Groceries", "Other"
-                  ]
-                      .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
-                      .toList(),
+                  items:
+                      [
+                            "Food",
+                            "Travel",
+                            "Shopping",
+                            "Bills",
+                            "Entertainment",
+                            "Groceries",
+                            "Other",
+                          ]
+                          .map(
+                            (cat) =>
+                                DropdownMenuItem(value: cat, child: Text(cat)),
+                          )
+                          .toList(),
                   onChanged: (value) {
                     setState(() => selectedCategory = value!);
                   },
@@ -175,12 +182,19 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
                 ),
                 elevation: 2,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 12,
+                  ),
                   child: Row(
                     children: [
-                      const Icon(Icons.calendar_today_rounded, color: Colors.deepPurple),
+                      const Icon(
+                        Icons.calendar_today_rounded,
+                        color: Colors.deepPurple,
+                      ),
                       const SizedBox(width: 12),
-                      Text("${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
+                      Text(
+                        "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
                         style: const TextStyle(fontSize: 16),
                       ),
                     ],
@@ -212,9 +226,9 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
                   orderId: '',
                   onSuccess: () {
                     setState(() {
-                      _isPaid = true; 
+                      _isPaid = true;
                     });
-                  }, 
+                  },
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -247,14 +261,26 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
                 style: TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),
+
+            const SizedBox(height: 30),
+
+            // const Text(
+            //   "My Expenses",
+            //   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            // ),
+            // const SizedBox(height: 10),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label,
-      {bool isNumber = false, int maxLines = 1}) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label, {
+    bool isNumber = false,
+    int maxLines = 1,
+  }) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 2,
@@ -272,4 +298,5 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
       ),
     );
   }
+
 }
