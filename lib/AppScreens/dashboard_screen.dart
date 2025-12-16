@@ -23,38 +23,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
   ];
   
   set welcomeText(String welcomeText) {
-    // This is a placeholder setter for welcomeText.
-    // The actual implementation would depend on the ChatBotWidget's API. 
     welcomeText = welcomeText;
     
   }
 
   LinearGradient getRandomGradient() {
     final gradients = [
-      LinearGradient(colors: [Color(0xFF6a85b6), Color(0xFFbac8e0)]),
-      LinearGradient(colors: [Color(0xFF26C6DA), Color(0xFF00ACC1)]),
+      LinearGradient(colors: [Color.fromARGB(255, 188, 208, 244), Color(0xFFbac8e0)]),
+      LinearGradient(colors: [Color(0xFF26C6DA), Color.fromARGB(255, 4, 226, 255)]),
       LinearGradient(colors: [Color.fromARGB(255, 134, 173, 201), Color(0xFF0396FF)]),
       LinearGradient(colors: [Color(0xFFFF9A8B), Color(0xFFFF6A88)]),
       LinearGradient(colors: [Color.fromARGB(255, 137, 207, 204), Color(0xFF00FFCC)]),
-      LinearGradient(colors: [Color.fromARGB(255, 193, 196, 181), Color.fromARGB(255, 149, 235, 191)]),
+      LinearGradient(colors: [Color.fromARGB(255, 233, 255, 147), Color.fromARGB(255, 161, 255, 207)]),
     ];
     gradients.shuffle();
     return gradients.first;
   }
-
-  // void _logout(BuildContext context) async {
-  //   try {
-  //     await FirebaseAuth.instance.signOut();
-  //     Get.offAllNamed('/LoginPage');
-  //     Get.snackbar(
-  //       "Logged Out",
-  //       "You have successfully logged out!",
-  //       backgroundColor: Colors.amberAccent,
-  //     );
-  //   } catch (e) {
-  //     Get.snackbar("Error", "Error logging out: $e");
-  //   }
-  // }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
