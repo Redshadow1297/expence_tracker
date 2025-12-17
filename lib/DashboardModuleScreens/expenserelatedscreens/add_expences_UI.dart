@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expence_tracker/AppScreens/scanner_ui_screen.dart';
 import 'package:expence_tracker/Utils/razor_pay_payments.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,9 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isPaid = false;
+  late PaymentController _paymentController = PaymentController();
+
+
 
   Future<void> addExpenses() async {
     try {
@@ -79,14 +83,30 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
     }
   }
 
-
   @override
-  void initState() {
-    super.initState();
-    amountController.addListener(() {
-      setState(() {}); // rebuild to show updated amount
-    });
-  }
+void initState() {
+  super.initState();
+
+  _paymentController = PaymentController(
+    onSuccess: () {
+      setState(() {
+        _isPaid = true;
+      });
+
+      Get.snackbar(
+        "Payment Successful",
+        "You can now save the expense",
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    },
+  );
+
+  amountController.addListener(() {
+    setState(() {});
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -208,40 +228,71 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
             const SizedBox(height: 30),
 
             // Pay Button
-            ElevatedButton(
+            // ElevatedButton(
+            //   onPressed: () {
+            //     double amount = double.tryParse(amountController.text) ?? 0;
+            //     if (amount <= 0) {
+            //       Get.snackbar(
+            //         "Error",
+            //         "Please enter a valid amount",
+            //         backgroundColor: Colors.red,
+            //         colorText: Colors.white,
+            //       );
+            //       return;
+            //     }
+            //     PaymentController().openCheckout(
+            //       amountInINR: amount.toInt(),
+            //       orderId: '',
+            //       onSuccess: () {
+            //         setState(() {
+            //           _isPaid = true;
+            //         });
+            //       },
+            //     );
+            //   },
+            //   style: ElevatedButton.styleFrom(
+            //     backgroundColor: Colors.greenAccent.shade700,
+            //     padding: const EdgeInsets.symmetric(vertical: 16),
+            //     shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(12),
+            //     ),
+            //   ),
+            //   child: Text(
+            //     "Pay ₹${amountController.text.isEmpty ? '0' : amountController.text}",
+            //     style: const TextStyle(fontSize: 18, color: Colors.white),
+            //   ),
+            // ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.qr_code_scanner),
+              label: const Text("Scan & Pay"),
               onPressed: () {
                 double amount = double.tryParse(amountController.text) ?? 0;
                 if (amount <= 0) {
                   Get.snackbar(
                     "Error",
-                    "Please enter a valid amount",
+                    "Enter valid amount",
                     backgroundColor: Colors.red,
                     colorText: Colors.white,
                   );
                   return;
                 }
 
-                PaymentController().openCheckout(
-                  amountInINR: amount.toInt(),
-                  orderId: '',
-                  onSuccess: () {
-                    setState(() {
-                      _isPaid = true;
-                    });
-                  },
+                Get.to(
+                  () => ScanUpiQrScreen(
+                    onUpiDetected: (upiId) {
+                      _paymentController.openUpiCheckout(
+                        amountInINR: amount.toInt(),
+                        upiId: upiId,
+                        onSuccess: () {
+                          setState(() {
+                            _isPaid = true;
+                          });
+                        },
+                      );
+                    },
+                  ),
                 );
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.greenAccent.shade700,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                "Pay ₹${amountController.text.isEmpty ? '0' : amountController.text}",
-                style: const TextStyle(fontSize: 18, color: Colors.white),
-              ),
             ),
 
             const SizedBox(height: 30),
@@ -298,5 +349,14 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
       ),
     );
   }
+
+  @override
+void dispose() {
+  _paymentController.dispose();
+  titleController.dispose();
+  amountController.dispose();
+  notesController.dispose();
+  super.dispose();
+}
 
 }

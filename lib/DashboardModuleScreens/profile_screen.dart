@@ -214,7 +214,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           Expanded(
             flex: 5,
             child: Text(
-              value ?? "",
+              value,
               style: const TextStyle(fontSize: 15, color: Colors.black87),
             ),
           ),
