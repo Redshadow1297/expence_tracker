@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expence_tracker/AppScreens/scanner_ui_screen.dart';
+import 'package:expence_tracker/Utils/app_snackbars.dart';
 import 'package:expence_tracker/Utils/razor_pay_payments.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -48,11 +49,9 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
         'uId': user.uid,
       });
 
-      Get.snackbar(
+      AppSnackbar.success(
         "Success",
         "Expense added successfully",
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
       );
 
       setState(() {
@@ -64,11 +63,9 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
         _isPaid = false;
       });
     } catch (e) {
-      Get.snackbar(
+      AppSnackbar.error(
         "Error",
         e.toString(),
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
       );
     } finally {
       if (Get.isDialogOpen == true) {
@@ -87,11 +84,9 @@ void initState() {
         _isPaid = true;
       });
 
-      Get.snackbar(
+      AppSnackbar.success(
         "Payment Successful",
         "You can now save the expense",
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
       );
     },
   );
@@ -261,11 +256,9 @@ void initState() {
               onPressed: () {
                 double amount = double.tryParse(amountController.text) ?? 0;
                 if (amount <= 0) {
-                  Get.snackbar(
+                  AppSnackbar.error(
                     "Error",
                     "Enter valid amount",
-                    backgroundColor: Colors.red,
-                    colorText: Colors.white,
                   );
                   return;
                 }

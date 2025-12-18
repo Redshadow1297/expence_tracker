@@ -1,3 +1,4 @@
+import 'package:expence_tracker/AppScreens/change_password_screen.dart';
 import 'package:expence_tracker/AppScreens/dashboard_screen.dart';
 import 'package:expence_tracker/AppScreens/login_screen.dart';
 import 'package:expence_tracker/AppScreens/signIn_screen.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: '/Splashscreen', page: () => ExpenseSplash()),
         GetPage(name: '/LoginPage', page: () => LoginScreen()),
+        GetPage(name: '/forgetPassword', page:() => ChangePasswordScreen()),
         GetPage(name: '/signIn', page: () => SignUpScreen()),
         GetPage(name: '/dashboard', page: () => DashboardScreen()),
         GetPage(name: '/profile', page: () => UserProfileScreen()),

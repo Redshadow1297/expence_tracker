@@ -48,26 +48,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
         toolbarHeight: 80,
         backgroundColor: Color.fromARGB(255, 9, 125, 148),
         elevation: 4,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Dashboard",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  "Manage your modules and explore your data.",
-                  style: TextStyle(fontSize: 13, color: Colors.white70),
-                ),
-              ],
+            Text(
+              "Dashboard",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              "Manage your modules and explore your data.",
+              style: TextStyle(fontSize: 13, color: Colors.white70),
             ),
           ],
         ),

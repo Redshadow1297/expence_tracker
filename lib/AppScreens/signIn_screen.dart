@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expence_tracker/Utils/app_snackbars.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -54,11 +55,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (adharID.text.length != 12 || !RegExp(r'^[0-9]+$').hasMatch(adharID.text)) {
       Get.snackbar("Aadhaar Verification Failed", "Invalid Aadhaar Number. It should contain exactly 12 digits.");
     } else {
-      Get.snackbar(
+      AppSnackbar.success(
         "Verification Successful",
         "Aadhaar number is valid.",
-        backgroundColor: Colors.amberAccent,
-        icon: Icon(Icons.done, size: 25),
       );
     }
   }
@@ -98,17 +97,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
       Get.back();
       clearAllFields();
       Get.offAllNamed('/LoginPage');
-      Get.snackbar(
+      AppSnackbar.success(
         "Success",
         "Account Created Successfully!",
-        backgroundColor: Colors.amberAccent,
       );
     } on FirebaseAuthException catch (e) {
       Get.back();
-      Get.snackbar(
+      AppSnackbar.error(
         "Error",
         e.message ?? "Unknown error",
-        backgroundColor: Colors.red[400]!,
       );
     }
   }

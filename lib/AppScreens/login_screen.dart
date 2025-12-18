@@ -1,3 +1,4 @@
+import 'package:expence_tracker/Utils/app_snackbars.dart';
 import 'package:expence_tracker/auth_BLoC/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,43 +34,23 @@ class _LoginScreenState extends State<LoginScreen> {
           'email': userCredential.user?.email,
         },
       );
-
-      Get.snackbar(
-        "Login",
-        "Successfully Logged In",
-        backgroundColor: Colors.amberAccent,
-        icon: Icon(Icons.done, size: 25),
-      );
+      AppSnackbar.success('Login', 'Successfully Logged In');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
-        Get.snackbar(
-          "User not found",
-          "Enter correct email",
-          backgroundColor: Colors.redAccent,
-        );
+        AppSnackbar.error("User not found", "Enter correct email");
       }
       if (e.code == 'wrong-password') {
-        Get.snackbar(
-          "Wrong Password",
-          "Enter correct password",
-          // backgroundColor: Colors.redAccent,
-        );
+        AppSnackbar.warning("Wrong Password", "Enter correct password");
       } else {
         print("FirebaseAuth Error: ${e.message}");
-        // Get.snackbar(
-        //   "Error",
-        //   e.message ?? "Unknown error",
-        //   backgroundColor: Colors.redAccent,
-        // );
-        Get.snackbar(
+
+        AppSnackbar.error(
           "Wrong credentials",
           "Enter correct username or password",
-          backgroundColor: Colors.red[400]!,
-          icon: Icon(Icons.error, size: 25),
         );
       }
     } catch (ex) {
-      Get.snackbar("Error", ex.toString());
+      AppSnackbar.error("Error", ex.toString());
     }
   }
 
@@ -173,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 55),
+                  SizedBox(height: 38),
                   InkWell(
                     onTap: () {
                       if (_formKey.currentState!.validate()) {
@@ -218,10 +199,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         "I'm new User",
                         style: TextStyle(
                           // fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                          fontSize: 16,
                         ),
                       ),
-                      SizedBox(width: 28),
+                      SizedBox(width: 20),
                       InkWell(
                         onTap: () {
                           // GetX
@@ -237,6 +218,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ],
+                  ),
+
+                  SizedBox(height: 100),
+
+                  InkWell(
+                    onTap: () {
+                      Get.toNamed('/forgetPassword');
+                    },
+                    child: Text(
+                      "Forget password ?",
+                      style: TextStyle(color: Colors.blueAccent, fontSize: 16),
+                    ),
                   ),
                 ],
               ),
