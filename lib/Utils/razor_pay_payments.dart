@@ -65,7 +65,7 @@ class PaymentController {
   this.onSuccess = onSuccess;
 
   var options = {
-    'key': 'rzp_test_xxxxx',
+    'key': 'rzp_test_Rp0NK7nOJ859cL',
     'amount': amountInINR * 100,
     'name': 'Expense Tracker',
     'description': 'UPI Expense Payment',

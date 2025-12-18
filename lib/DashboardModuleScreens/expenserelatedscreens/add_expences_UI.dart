@@ -27,14 +27,8 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
 
   Future<void> addExpenses() async {
     try {
-      // Show loader
-      // Get.dialog(
-      //   const Center(child: CircularProgressIndicator()),
-      //   barrierDismissible: false,
-      // );
       Get.showOverlay(
         asyncFunction: () async {
-          // firestore save here
         },
         loadingWidget: const Center(child: CircularProgressIndicator()),
       );
@@ -106,8 +100,6 @@ void initState() {
     setState(() {});
   });
 }
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -262,6 +254,7 @@ void initState() {
             //     style: const TextStyle(fontSize: 18, color: Colors.white),
             //   ),
             // ),
+            
             ElevatedButton.icon(
               icon: const Icon(Icons.qr_code_scanner),
               label: const Text("Scan & Pay"),
@@ -315,11 +308,6 @@ void initState() {
 
             const SizedBox(height: 30),
 
-            // const Text(
-            //   "My Expenses",
-            //   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            // ),
-            // const SizedBox(height: 10),
           ],
         ),
       ),
