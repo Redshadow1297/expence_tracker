@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expence_tracker/Widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
@@ -56,15 +57,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
-        title: const Text(
-          "User Profile",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Color(0xFF097D94),
-        elevation: 4,
-      ),
+      appBar: CustomAppBar(title: "User Profile", subTitle: "You can handle your profile here."),
       body: SafeArea(
         child: isLoading
             ? const Center(child: CircularProgressIndicator(color: Color(0xFF097D94)))

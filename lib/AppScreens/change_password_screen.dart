@@ -1,4 +1,5 @@
 import 'package:expence_tracker/Utils/app_snackbars.dart';
+import 'package:expence_tracker/Widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -66,7 +67,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Change Password')),
+      appBar: CustomAppBar(title: "Change Password", subTitle: "Manage your password"),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

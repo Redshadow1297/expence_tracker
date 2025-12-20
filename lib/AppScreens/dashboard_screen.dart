@@ -1,3 +1,4 @@
+import 'package:expence_tracker/Widgets/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -44,29 +45,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar: AppBar(
-        toolbarHeight: 80,
-        backgroundColor: Color.fromARGB(255, 9, 125, 148),
-        elevation: 4,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Dashboard",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 4),
-            Text(
-              "Manage your modules and explore your data.",
-              style: TextStyle(fontSize: 13, color: Colors.white70),
-            ),
-          ],
-        ),
-      ),
+      appBar: CustomAppBar(title: "Dashboard", subTitle: "Manage your dashboard"),
       body: SafeArea(
         child: Stack(
           children: [

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expence_tracker/DashboardModuleScreens/expenserelatedscreens/add_expences_UI.dart';
+import 'package:expence_tracker/Widgets/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -97,28 +98,29 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: const Color(0xFF097D94),
-        elevation: 4,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
-              "Expenses",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 2),
-            Text(
-              "Manage your monthly and daily expenses here",
-              style: TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-          ],
-        ),
-      ),
+      appBar : CustomAppBar(title: "Expenses", subTitle: "Manage your monthly and daily expenses here"),
+      // appBar: AppBar(
+      //   automaticallyImplyLeading: false,
+      //   backgroundColor: const Color(0xFF097D94),
+      //   elevation: 4,
+      //   title: Column(
+      //     crossAxisAlignment: CrossAxisAlignment.start,
+      //     children: const [
+      //       Text(
+      //         "Expenses",
+      //         style: TextStyle(
+      //           color: Colors.white,
+      //           fontWeight: FontWeight.bold,
+      //         ),
+      //       ),
+      //       SizedBox(height: 2),
+      //       Text(
+      //         "Manage your monthly and daily expenses here",
+      //         style: TextStyle(fontSize: 12, color: Colors.white70),
+      //       ),
+      //     ],
+      //   ),
+      // ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Get.to(AddExpenseUI()),
         backgroundColor: Colors.deepPurple,

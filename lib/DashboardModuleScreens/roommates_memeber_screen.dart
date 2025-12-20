@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expence_tracker/Widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 
 class RoomMembers extends StatefulWidget {
@@ -23,24 +24,7 @@ class _RoomMembersState extends State<RoomMembers> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
-              "Room Members",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              "Get the contacts of your room members here",
-              style: TextStyle(color: Colors.white70, fontSize: 12),
-            ),
-          ],
-        ),
-        backgroundColor: const Color(0xFF097D94),
-        elevation: 4,
-      ),
+      appBar : CustomAppBar(title: "Room Members", subTitle: "Get the contacts of your room members here."),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: FutureBuilder<List<Map<String, dynamic>>>(

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expence_tracker/Utils/app_snackbars.dart';
+import 'package:expence_tracker/Widgets/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -136,11 +137,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar: AppBar(
-        title: Text("Register Yourself", style: TextStyle(color: Colors.white)),
-        backgroundColor: Color.fromARGB(255, 9, 125, 148),
-        elevation: 4,
-      ),
+      appBar: CustomAppBar(title: "Register Yourself", subTitle: "Save your all profile details here."),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(16),

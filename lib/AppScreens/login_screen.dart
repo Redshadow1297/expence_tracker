@@ -1,4 +1,5 @@
 import 'package:expence_tracker/Utils/app_snackbars.dart';
+import 'package:expence_tracker/Widgets/custom_appbar.dart';
 import 'package:expence_tracker/auth_BLoC/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -76,15 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar: AppBar(
-        title: Text("Expense Tracker", style: TextStyle(color: Colors.white)),
-        backgroundColor: const Color.from(
-          alpha: 1,
-          red: 0.035,
-          green: 0.49,
-          blue: 0.58,
-        ),
-      ),
+      appBar : CustomAppBar(title: "Expense Tracker", subTitle: "You can Login from here."),
       body: SafeArea(
         child: Center(
           child: Form(

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expence_tracker/AppScreens/scanner_ui_screen.dart';
 import 'package:expence_tracker/Utils/app_snackbars.dart';
 import 'package:expence_tracker/Utils/razor_pay_payments.dart';
+import 'package:expence_tracker/Widgets/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -99,14 +100,7 @@ void initState() {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF097D94),
-        elevation: 4,
-        title: const Text(
-          "Add Expense",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
+     appBar : CustomAppBar(title: "Add Expenses", subTitle: "You can add daily Expense here."),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(

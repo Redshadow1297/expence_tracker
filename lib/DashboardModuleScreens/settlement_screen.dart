@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expence_tracker/Widgets/custom_appbar.dart';
 import 'package:expence_tracker/model/settlement_model.dart';
 import 'package:flutter/material.dart';
 
@@ -14,29 +15,30 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar: AppBar(
-        toolbarHeight: 80,
-        backgroundColor: const Color.fromARGB(255, 9, 125, 148),
-        elevation: 8,
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Settlements",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 4),
-            Text(
-              "You can see the settlements here.",
-              style: TextStyle(fontSize: 13, color: Colors.white70),
-            ),
-          ],
-        ),
-      ),
+      // appBar: AppBar(
+      //   toolbarHeight: 80,
+      //   backgroundColor: const Color.fromARGB(255, 9, 125, 148),
+      //   elevation: 8,
+      //   title: const Column(
+      //     crossAxisAlignment: CrossAxisAlignment.start,
+      //     children: [
+      //       Text(
+      //         "Settlements",
+      //         style: TextStyle(
+      //           color: Colors.white,
+      //           fontSize: 22,
+      //           fontWeight: FontWeight.bold,
+      //         ),
+      //       ),
+      //       SizedBox(height: 4),
+      //       Text(
+      //         "You can see the settlements here.",
+      //         style: TextStyle(fontSize: 13, color: Colors.white70),
+      //       ),
+      //     ],
+      //   ),
+      // ),
+      appBar: CustomAppBar(title: "Settlements", subTitle: "You can see the settlements here."),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
