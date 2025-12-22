@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expence_tracker/Presentation/app_lables.dart';
 import 'package:expence_tracker/Presentation/custom_appbar.dart';
 import 'package:expence_tracker/model/settlement_model.dart';
 import 'package:flutter/material.dart';
@@ -97,7 +98,7 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
           future: FirebaseFirestore.instance.collection('users').doc(uId).get(),
           builder: (context, userSnapshot) {
             if (!userSnapshot.hasData) {
-              return const ListTile(title: Text('Loading...'));
+              return ListTile(title: AppLabel.caption('Loading...', Colors.grey));
             }
 
             final user = userSnapshot.data!.data() as Map<String, dynamic>;
@@ -108,16 +109,14 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
             return Card(
               elevation: 3,
               child: ListTile(
-                title: Text(
-                  fullName,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                title: AppLabel.body(
+                  fullName, Colors.black87,
                 ),
-                subtitle: Text(
-                  'Category: $category\nDate: ${date != null ? date.toString().split(' ')[0] : 'N/A'}',
+                subtitle: AppLabel.body(
+                  'Category: $category\nDate: ${date != null ? date.toString().split(' ')[0] : 'N/A'}', Colors.black87,
                 ),
-                trailing: Text(
-                  '₹$amount',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                trailing: AppLabel.caption(
+                  '₹$amount', Colors.deepPurple,
                 ),
               ),
             );
@@ -180,9 +179,8 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Settlements",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+             AppLabel.title(
+              "Settlements", Colors.deepPurpleAccent
             ),
             const Divider(),
             ...settlements.map((s) {

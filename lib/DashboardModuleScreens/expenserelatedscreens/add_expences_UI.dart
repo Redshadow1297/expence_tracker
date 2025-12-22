@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expence_tracker/AppScreens/scanner_ui_screen.dart';
+import 'package:expence_tracker/Presentation/app_lables.dart';
 import 'package:expence_tracker/Presentation/app_snackbars.dart';
 import 'package:expence_tracker/Utils/razor_pay_payments.dart';
 import 'package:expence_tracker/Presentation/custom_appbar.dart';
@@ -113,14 +114,15 @@ void initState() {
               margin: const EdgeInsets.only(bottom: 20),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  "Expense Details",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepPurple.shade700,
-                  ),
-                ),
+                child: AppLabel.title("Expense Details", Colors.deepPurpleAccent),
+                // Text(
+                //   "Expense Details",
+                //   style: TextStyle(
+                //     fontSize: 22,
+                //     fontWeight: FontWeight.bold,
+                //     color: Colors.deepPurple.shade700,
+                //   ),
+                // ),
               ),
             ),
 
@@ -287,12 +289,8 @@ void initState() {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
-                "Save Expense",
-                style: TextStyle(fontSize: 18, color: Colors.white),
+              child: AppLabel.body("Save Expense", Colors.white),
               ),
-            ),
-
             const SizedBox(height: 30),
 
           ],

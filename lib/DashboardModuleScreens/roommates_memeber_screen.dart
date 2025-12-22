@@ -10,10 +10,10 @@ class RoomMembers extends StatefulWidget {
 }
 
 class _RoomMembersState extends State<RoomMembers> {
-  
   Future<List<Map<String, dynamic>>> getRoomMembers() async {
-    QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('users').get();
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .get();
 
     return snapshot.docs
         .map((doc) => {'id': doc.id, ...doc.data() as Map<String, dynamic>})
@@ -24,7 +24,10 @@ class _RoomMembersState extends State<RoomMembers> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar : CustomAppBar(title: "Room Members", subTitle: "Get the contacts of your room members here."),
+      appBar: CustomAppBar(
+        title: "Room Members",
+        subTitle: "Get the contacts of your room members here.",
+      ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: FutureBuilder<List<Map<String, dynamic>>>(
@@ -32,15 +35,17 @@ class _RoomMembersState extends State<RoomMembers> {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF097D94)));
+                child: CircularProgressIndicator(color: Color(0xFF097D94)),
+              );
             }
 
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return const Center(
-                  child: Text(
-                "No users found",
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ));
+                child: Text(
+                  "No users found",
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              );
             }
 
             final members = snapshot.data!;
@@ -52,18 +57,21 @@ class _RoomMembersState extends State<RoomMembers> {
                 return Card(
                   elevation: 4,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Row(
                       children: [
                         CircleAvatar(
-                          radius: 30,
-                          backgroundImage: NetworkImage(
-                            member['profilePic'] ??
-                                'https://www.pngall.com/wp-content/uploads/5/Profile-Transparent.png',
-                          ),
+                          radius: 55,
+                          backgroundImage:
+                              (member['profilePic'] != null &&
+                                  member['profilePic'].toString().isNotEmpty)
+                              ? NetworkImage(member['profilePic'])
+                              : const AssetImage('assets/user.png')
+                                    as ImageProvider,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -81,12 +89,16 @@ class _RoomMembersState extends State<RoomMembers> {
                               Text(
                                 "Email: ${member['emailId'] ?? 'N/A'}",
                                 style: const TextStyle(
-                                    fontSize: 14, color: Colors.black87),
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                ),
                               ),
                               Text(
                                 "Contact: ${member['mobileNumber'] ?? 'N/A'}",
                                 style: const TextStyle(
-                                    fontSize: 14, color: Colors.black87),
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                ),
                               ),
                             ],
                           ),

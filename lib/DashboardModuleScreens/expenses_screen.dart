@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expence_tracker/DashboardModuleScreens/expenserelatedscreens/add_expences_UI.dart';
+import 'package:expence_tracker/Presentation/app_lables.dart';
 import 'package:expence_tracker/Presentation/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -139,7 +140,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text("No expenses added yet"));
+            return Center(child: AppLabel.body("No expenses added yet", Colors.black54),);
           }
 
           final allDocs = snapshot.data!.docs;

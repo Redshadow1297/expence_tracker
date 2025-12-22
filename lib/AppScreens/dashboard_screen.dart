@@ -1,3 +1,4 @@
+import 'package:expence_tracker/Presentation/app_lables.dart';
 import 'package:expence_tracker/Presentation/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -74,13 +75,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                           SizedBox(width: 12),
                           Expanded(
-                            child: Text(
-                              "Welcome to Your Dashboard!",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
+                            child: AppLabel.title(
+                              "Welcome to Your Dashboard!",Colors.lightBlueAccent
                             ),
                           ),
                         ],

@@ -1,3 +1,4 @@
+import 'package:expence_tracker/Presentation/app_lables.dart';
 import 'package:expence_tracker/Presentation/app_snackbars.dart';
 import 'package:expence_tracker/Presentation/custom_appbar.dart';
 import 'package:expence_tracker/auth_BLoC/auth_bloc.dart';
@@ -188,13 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        "I'm new User",
-                        style: TextStyle(
-                          // fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+                     AppLabel.body( "Don't have an account?", Colors.black54),
                       SizedBox(width: 20),
                       InkWell(
                         onTap: () {
@@ -219,10 +214,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onTap: () {
                       Get.toNamed('/forgetPassword');
                     },
-                    child: Text(
-                      "Forget password ?",
-                      style: TextStyle(color: Colors.blueAccent, fontSize: 16),
-                    ),
+                    child: AppLabel.body( "Forgot Password?", Colors.blueAccent),
                   ),
                 ],
               ),

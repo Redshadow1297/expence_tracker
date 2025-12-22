@@ -6,21 +6,21 @@ class AppLabel extends StatelessWidget {
 
   const AppLabel._(this.text, this.style);
 
-  factory AppLabel.body(String text) {
+  factory AppLabel.body(String text, Color white) {
     return AppLabel._(
       text,
       const TextStyle(fontSize: 14),
     );
   }
 
-  factory AppLabel.title(String text) {
+  factory AppLabel.title(String text, MaterialAccentColor lightBlueAccent) {
     return AppLabel._(
       text,
       const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
     );
   }
 
-  factory AppLabel.caption(String text) {
+  factory AppLabel.caption(String text, MaterialColor grey) {
     return AppLabel._(
       text,
       const TextStyle(fontSize: 12, color: Colors.grey),

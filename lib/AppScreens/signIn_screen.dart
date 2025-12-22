@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expence_tracker/Presentation/app_lables.dart';
 import 'package:expence_tracker/Presentation/app_snackbars.dart';
 import 'package:expence_tracker/Presentation/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -40,17 +41,43 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<String?> uploadProfilePic(String uid) async {
     if (pickedImage == null) return null;
+
     try {
-      final file = File(pickedImage!.path);
-      final bytes = await file.readAsBytes();
-      final ref = FirebaseStorage.instance.ref().child("profilePics/$uid.jpg");
-      await ref.putData(bytes, SettableMetadata(contentType: "image/jpeg"));
-      return await ref.getDownloadURL();
+      File file = File(pickedImage!.path);
+
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('profilePics')
+          .child('$uid.jpg');
+
+      UploadTask uploadTask = ref.putFile(
+        file,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+
+      TaskSnapshot snapshot = await uploadTask;
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+
+      return downloadUrl;
     } catch (e) {
-      print("UPLOAD ERROR: $e");
+      debugPrint("UPLOAD ERROR: $e");
       return null;
     }
   }
+
+  // Future<String?> uploadProfilePic(String uid) async {
+  //   if (pickedImage == null) return null;
+  //   try {
+  //     final file = File(pickedImage!.path);
+  //     final bytes = await file.readAsBytes();
+  //     final ref = FirebaseStorage.instance.ref().child("profilePics/$uid.jpg");
+  //     await ref.putData(bytes, SettableMetadata(contentType: "image/jpeg"));
+  //     return await ref.getDownloadURL();
+  //   } catch (e) {
+  //     print("UPLOAD ERROR: $e");
+  //     return null;
+  //   }
+  // }
 
   void verifyAadhaar() {
     if (adharID.text.length != 12 ||
@@ -154,13 +181,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Column(
               children: [
                 SizedBox(height: 20),
-                Text(
-                  "Welcome To Legends Empire!",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 9, 125, 148),
-                  ),
+                AppLabel.title(
+                  "Welcome to Legends Empire !",
+                  Colors.lightBlueAccent,
                 ),
                 SizedBox(height: 20),
 
