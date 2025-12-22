@@ -1,3 +1,4 @@
+import 'package:expence_tracker/Presentation/app_buittons.dart';
 import 'package:expence_tracker/Presentation/app_lables.dart';
 import 'package:expence_tracker/Presentation/app_snackbars.dart';
 import 'package:expence_tracker/Presentation/custom_appbar.dart';
@@ -149,42 +150,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   SizedBox(height: 38),
-                  InkWell(
-                    onTap: () {
-                      if (_formKey.currentState!.validate()) {
-                        getLoggedIn(
-                          userNameController.text.trim(),
-                          passwordController.text.trim(),
-                        );
-                        // BlocProvider.of<LoginBloc>(
-                        //   context,
-                        // ).add(LoginButtonPressed(email: '', password: ''));
-                      }
-                    },
-                    child: Container(
-                      height: 57,
-                      decoration: BoxDecoration(
-                        color: Color.from(
-                          alpha: 1,
-                          red: 0.035,
-                          green: 0.49,
-                          blue: 0.58,
-                        ),
-                        border: Border.all(),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Center(
-                        child: Text(
-                          "LogIn",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  AppButton(text: "LogIn", onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      getLoggedIn(
+                        userNameController.text.trim(),
+                        passwordController.text.trim(),
+                      );
+                  }
+                  }),
                   SizedBox(height: 40),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

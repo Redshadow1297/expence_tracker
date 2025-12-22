@@ -1,3 +1,4 @@
+import 'package:expence_tracker/Presentation/app_buittons.dart';
 import 'package:expence_tracker/Presentation/app_snackbars.dart';
 import 'package:expence_tracker/Presentation/custom_appbar.dart';
 import 'package:flutter/material.dart';
@@ -99,12 +100,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               const SizedBox(height: 32),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _changePassword,
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Update Password'),
-                ),
+                child: AppButton(text: "Update Password", onPressed: _changePassword, isLoading: _isLoading),
               ),
             ],
           ),

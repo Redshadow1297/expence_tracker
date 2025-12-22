@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expence_tracker/Presentation/app_buittons.dart';
 import 'package:expence_tracker/Presentation/app_lables.dart';
 import 'package:expence_tracker/Presentation/app_snackbars.dart';
 import 'package:expence_tracker/Presentation/custom_appbar.dart';
@@ -328,43 +329,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ],
                 ),
                 SizedBox(height: 30),
-
-                InkWell(
-                  onTap: () {
-                    if (_formKey.currentState!.validate()) {
-                      submitForm(
-                        firstName.text,
-                        lastName.text,
-                        mailId.text,
-                        password.text,
-                        reTypedPassword.text,
-                        mobileNumber.text,
-                        adharID.text,
-                        address.text,
-                      );
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: Text(
-                        "Submit Data",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                AppButton(text: "Submit Data", onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    submitForm(
+                      firstName.text,
+                      lastName.text,
+                      mailId.text,
+                      password.text,
+                      reTypedPassword.text,
+                      mobileNumber.text,
+                      adharID.text,
+                      address.text,
+                    );
+                  }
+                }),
                 SizedBox(height: 30),
               ],
             ),

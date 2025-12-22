@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expence_tracker/Presentation/app_buittons.dart';
 import 'package:expence_tracker/Presentation/app_lables.dart';
 import 'package:expence_tracker/Presentation/custom_appbar.dart';
 import 'package:flutter/material.dart';
@@ -112,13 +113,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                 : const AssetImage('assets/user.png')
                                       as ImageProvider,
                           ),
-                          // CircleAvatar(
-                          //   radius: 55,
-                          //   backgroundImage: NetworkImage(
-                          //     userData?['profilePic'] ??
-                          //         'https://www.pngall.com/wp-content/uploads/5/Profile-Transparent.png',
-                          //   ),
-                          // ),
                           const SizedBox(height: 12),
                           Text(
                             "${userData?['firstName']} ${userData?['lastName']}",
@@ -172,31 +166,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     const SizedBox(height: 30),
 
                     // Logout Button
-                    InkWell(
-                      onTap: () async {
+                    AppButton(
+                      text: "LogOut",
+                      onPressed: () async {
                         await FirebaseAuth.instance.signOut();
                         Get.offAllNamed('/LoginPage');
                       },
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            "Log Out",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
                     ),
                   ],
                 ),

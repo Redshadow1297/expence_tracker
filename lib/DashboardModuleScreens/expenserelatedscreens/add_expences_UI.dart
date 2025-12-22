@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expence_tracker/AppScreens/scanner_ui_screen.dart';
+import 'package:expence_tracker/Presentation/app_buittons.dart';
 import 'package:expence_tracker/Presentation/app_lables.dart';
 import 'package:expence_tracker/Presentation/app_snackbars.dart';
 import 'package:expence_tracker/Utils/razor_pay_payments.dart';
@@ -280,17 +281,7 @@ void initState() {
             const SizedBox(height: 30),
 
             // Save Button
-            ElevatedButton(
-              onPressed: _isPaid ? addExpenses : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _isPaid ? Colors.deepPurple : Colors.grey,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: AppLabel.body("Save Expense", Colors.white),
-              ),
+            AppButton(text: "Save Expenses", onPressed: _isPaid ? addExpenses : null, isLoading: false),
             const SizedBox(height: 30),
 
           ],
