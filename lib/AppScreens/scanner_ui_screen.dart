@@ -13,7 +13,7 @@ class ScanUpiQrScreen extends StatelessWidget {
     formats: [BarcodeFormat.qrCode],
     torchEnabled: true,
     detectionSpeed: DetectionSpeed.noDuplicates,
-    facing: CameraFacing.fromRawValue(50)
+    facing: CameraFacing.back,
   );
 
   @override

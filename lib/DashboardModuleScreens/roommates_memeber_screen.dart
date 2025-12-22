@@ -55,7 +55,7 @@ class _RoomMembersState extends State<RoomMembers> {
               itemBuilder: (context, index) {
                 final member = members[index];
                 return Card(
-                  elevation: 4,
+                  elevation: 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -65,7 +65,7 @@ class _RoomMembersState extends State<RoomMembers> {
                     child: Row(
                       children: [
                         CircleAvatar(
-                          radius: 55,
+                          radius: 28,
                           backgroundImage:
                               (member['profilePic'] != null &&
                                   member['profilePic'].toString().isNotEmpty)

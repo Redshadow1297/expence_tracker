@@ -112,11 +112,11 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
                 title: AppLabel.body(
                   fullName, Colors.black87,
                 ),
-                subtitle: AppLabel.body(
-                  'Category: $category\nDate: ${date != null ? date.toString().split(' ')[0] : 'N/A'}', Colors.black87,
+                subtitle: AppLabel.caption(
+                  'Category: $category\nDate: ${date != null ? date.toString().split(' ')[0] : 'N/A'}', Colors.grey,
                 ),
                 trailing: AppLabel.caption(
-                  '₹$amount', Colors.deepPurple,
+                  '₹$amount', Colors.blue,
                 ),
               ),
             );
@@ -208,8 +208,8 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Text(
-                          "${fromUser['firstName']} pays ₹${s.amount.toStringAsFixed(2)} to ${toUser['firstName']}",
+                        child: AppLabel.body(
+                          "${fromUser['firstName']} pays ₹${s.amount.toStringAsFixed(2)} to ${toUser['firstName']}",Colors.black,
                         ),
                       );
                     },
