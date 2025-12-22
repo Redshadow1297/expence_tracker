@@ -1,5 +1,5 @@
-import 'package:expence_tracker/Utils/app_snackbars.dart';
-import 'package:expence_tracker/Widgets/custom_appbar.dart';
+import 'package:expence_tracker/Presentation/app_snackbars.dart';
+import 'package:expence_tracker/Presentation/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -51,9 +51,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         "Password changed successfully",
       );
 
+      // ignore: use_build_context_synchronously
       Navigator.pop(context);
       
     } on FirebaseAuthException catch (e) {
+        // ignore: avoid_print
         print(e);
        AppSnackbar.error(
         "Error",

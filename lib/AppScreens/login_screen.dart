@@ -1,5 +1,5 @@
-import 'package:expence_tracker/Utils/app_snackbars.dart';
-import 'package:expence_tracker/Widgets/custom_appbar.dart';
+import 'package:expence_tracker/Presentation/app_snackbars.dart';
+import 'package:expence_tracker/Presentation/custom_appbar.dart';
 import 'package:expence_tracker/auth_BLoC/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

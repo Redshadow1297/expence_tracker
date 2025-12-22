@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:expence_tracker/Utils/app_snackbars.dart';
-import 'package:expence_tracker/Widgets/custom_appbar.dart';
+import 'package:expence_tracker/Presentation/app_snackbars.dart';
+import 'package:expence_tracker/Presentation/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -53,8 +53,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void verifyAadhaar() {
-    if (adharID.text.length != 12 || !RegExp(r'^[0-9]+$').hasMatch(adharID.text)) {
-      Get.snackbar("Aadhaar Verification Failed", "Invalid Aadhaar Number. It should contain exactly 12 digits.");
+    if (adharID.text.length != 12 ||
+        !RegExp(r'^[0-9]+$').hasMatch(adharID.text)) {
+      Get.snackbar(
+        "Aadhaar Verification Failed",
+        "Invalid Aadhaar Number. It should contain exactly 12 digits.",
+      );
     } else {
       AppSnackbar.success(
         "Verification Successful",
@@ -64,16 +68,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> submitForm(
-      String uFirstName,
-      String uLastName,
-      String uMailId,
-      String uPassword,
-      String uReTypedPassword,
-      String uMobileNumber,
-      String uAdharID,
-      String uAddress) async {
+    String uFirstName,
+    String uLastName,
+    String uMailId,
+    String uPassword,
+    String uReTypedPassword,
+    String uMobileNumber,
+    String uAdharID,
+    String uAddress,
+  ) async {
     try {
-      Get.dialog(Center(child: CircularProgressIndicator()), barrierDismissible: false);
+      Get.dialog(
+        Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
 
       UserCredential uc = await _auth.createUserWithEmailAndPassword(
         email: uMailId,
@@ -98,16 +106,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
       Get.back();
       clearAllFields();
       Get.offAllNamed('/LoginPage');
-      AppSnackbar.success(
-        "Success",
-        "Account Created Successfully!",
-      );
+      AppSnackbar.success("Success", "Account Created Successfully!");
     } on FirebaseAuthException catch (e) {
       Get.back();
-      AppSnackbar.error(
-        "Error",
-        e.message ?? "Unknown error",
-      );
+      AppSnackbar.error("Error", e.message ?? "Unknown error");
     }
   }
 
@@ -129,7 +131,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
       filled: true,
       fillColor: Colors.white,
       contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide.none,
+      ),
     );
   }
 
@@ -137,7 +142,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar: CustomAppBar(title: "Register Yourself", subTitle: "Save your all profile details here."),
+      appBar: CustomAppBar(
+        title: "Register Yourself",
+        subTitle: "Save your all profile details here.",
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(16),
@@ -163,63 +171,137 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     child: CircleAvatar(
                       radius: 50,
                       backgroundColor: Colors.grey[300],
-                      backgroundImage: pickedImage != null ? FileImage(File(pickedImage!.path)) : null,
-                      child: pickedImage == null ? Icon(Icons.camera_alt, size: 40, color: Color.fromARGB(255, 9, 125, 148)) : null,
+                      backgroundImage: pickedImage != null
+                          ? FileImage(File(pickedImage!.path))
+                          : null,
+                      child: pickedImage == null
+                          ? Icon(
+                              Icons.camera_alt,
+                              size: 40,
+                              color: Color.fromARGB(255, 9, 125, 148),
+                            )
+                          : null,
                     ),
                   ),
                 ),
                 SizedBox(height: 20),
 
                 // Input fields
-                TextFormField(controller: firstName, decoration: _inputDecoration("First Name", Icons.person), validator: (v) => v!.isEmpty ? "Enter first name" : null),
+                TextFormField(
+                  controller: firstName,
+                  decoration: _inputDecoration("First Name", Icons.person),
+                  validator: (v) => v!.isEmpty ? "Enter first name" : null,
+                ),
                 SizedBox(height: 15),
-                TextFormField(controller: lastName, decoration: _inputDecoration("Last Name", Icons.abc), validator: (v) => v!.isEmpty ? "Enter last name" : null),
+                TextFormField(
+                  controller: lastName,
+                  decoration: _inputDecoration("Last Name", Icons.abc),
+                  validator: (v) => v!.isEmpty ? "Enter last name" : null,
+                ),
                 SizedBox(height: 15),
-                TextFormField(controller: mailId, decoration: _inputDecoration("Email", Icons.email_outlined), validator: (v) {
-                  if (v!.isEmpty) return "Enter email";
-                  if (!RegExp(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$").hasMatch(v)) return "Enter valid email";
-                  return null;
-                }),
+                TextFormField(
+                  controller: mailId,
+                  decoration: _inputDecoration("Email", Icons.email_outlined),
+                  validator: (v) {
+                    if (v!.isEmpty) return "Enter email";
+                    if (!RegExp(
+                      r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$",
+                    ).hasMatch(v)) {
+                      return "Enter valid email";
+                    }
+                    return null;
+                  },
+                ),
                 SizedBox(height: 15),
-                TextFormField(controller: password, obscureText: true, decoration: _inputDecoration("Password", Icons.password), validator: (v) => v!.length < 6 ? "Password must be 6 characters or more" : null),
+                TextFormField(
+                  controller: password,
+                  obscureText: true,
+                  decoration: _inputDecoration("Password", Icons.password),
+                  validator: (v) => v!.length < 6
+                      ? "Password must be 6 characters or more"
+                      : null,
+                ),
                 SizedBox(height: 15),
-                TextFormField(controller: reTypedPassword, obscureText: true, decoration: _inputDecoration("Re-Type Password", Icons.lock_outline), validator: (v) {
-                  if (v!.isEmpty) return "Re-enter password";
-                  if (v != password.text) return "Passwords do not match";
-                  return null;
-                }),
+                TextFormField(
+                  controller: reTypedPassword,
+                  obscureText: true,
+                  decoration: _inputDecoration(
+                    "Re-Type Password",
+                    Icons.lock_outline,
+                  ),
+                  validator: (v) {
+                    if (v!.isEmpty) return "Re-enter password";
+                    if (v != password.text) return "Passwords do not match";
+                    return null;
+                  },
+                ),
                 SizedBox(height: 15),
-                TextFormField(controller: mobileNumber, keyboardType: TextInputType.number, decoration: _inputDecoration("Mobile Number", Icons.phone), validator: (v) {
-                  if (v!.length != 10) return "Enter 10-digit mobile number";
-                  return null;
-                }),
+                TextFormField(
+                  controller: mobileNumber,
+                  keyboardType: TextInputType.number,
+                  decoration: _inputDecoration("Mobile Number", Icons.phone),
+                  validator: (v) {
+                    if (v!.length != 10) return "Enter 10-digit mobile number";
+                    return null;
+                  },
+                ),
                 SizedBox(height: 15),
-                TextFormField(controller: address, decoration: _inputDecoration("Address", Icons.location_on_outlined), validator: (v) => v!.isEmpty ? "Enter address" : null),
+                TextFormField(
+                  controller: address,
+                  decoration: _inputDecoration(
+                    "Address",
+                    Icons.location_on_outlined,
+                  ),
+                  validator: (v) => v!.isEmpty ? "Enter address" : null,
+                ),
                 SizedBox(height: 15),
 
                 Row(
                   children: [
                     Expanded(
-                      child: TextFormField(controller: adharID, keyboardType: TextInputType.number, decoration: _inputDecoration("Aadhaar Number", Icons.credit_card), validator: (v) {
-                        if (v!.isEmpty) return "Enter Aadhaar number";
-                        if (v.length != 12) return "Aadhaar must be 12 digits";
-                        if (!RegExp(r'^[0-9]+$').hasMatch(v)) return "Only digits allowed";
-                        return null;
-                      }),
+                      child: TextFormField(
+                        controller: adharID,
+                        keyboardType: TextInputType.number,
+                        decoration: _inputDecoration(
+                          "Aadhaar Number",
+                          Icons.credit_card,
+                        ),
+                        validator: (v) {
+                          if (v!.isEmpty) return "Enter Aadhaar number";
+                          if (v.length != 12) {
+                            return "Aadhaar must be 12 digits";
+                          }
+                          if (!RegExp(r'^[0-9]+$').hasMatch(v)) {
+                            return "Only digits allowed";
+                          }
+                          return null;
+                        },
+                      ),
                     ),
                     SizedBox(width: 10),
                     InkWell(
                       onTap: verifyAadhaar,
                       borderRadius: BorderRadius.circular(8),
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(colors: [Color(0xFF6A11CB), Color(0xFF2575FC)]),
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
+                          ),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Text("Verify", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          "Verify",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    )
+                    ),
                   ],
                 ),
                 SizedBox(height: 30),
@@ -243,10 +325,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: Container(
                     height: 50,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [Color(0xFF6A11CB), Color(0xFF2575FC)]),
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
+                      ),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Center(child: Text("Submit Data", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18))),
+                    child: Center(
+                      child: Text(
+                        "Submit Data",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(height: 30),
