@@ -116,14 +116,6 @@ void initState() {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: AppLabel.title("Expense Details", Colors.deepPurpleAccent),
-                // Text(
-                //   "Expense Details",
-                //   style: TextStyle(
-                //     fontSize: 22,
-                //     fontWeight: FontWeight.bold,
-                //     color: Colors.deepPurple.shade700,
-                //   ),
-                // ),
               ),
             ),
 
@@ -210,7 +202,6 @@ void initState() {
             const SizedBox(height: 16),
             _buildTextField(notesController, "Notes", maxLines: 3),
             const SizedBox(height: 30),
-
             // Pay Button
             // ElevatedButton(
             //   onPressed: () {
@@ -246,7 +237,6 @@ void initState() {
             //     style: const TextStyle(fontSize: 18, color: Colors.white),
             //   ),
             // ),
-            
             ElevatedButton.icon(
               icon: const Icon(Icons.qr_code_scanner),
               label: const Text("Scan & Pay"),
