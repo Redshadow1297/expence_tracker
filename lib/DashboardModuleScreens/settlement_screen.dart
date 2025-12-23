@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:expence_tracker/Presentation/app_lables.dart';
-import 'package:expence_tracker/Presentation/custom_appbar.dart';
+import 'package:expence_tracker/CommonWidgets/app_lables.dart';
+import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
 import 'package:expence_tracker/model/settlement_model.dart';
 import 'package:flutter/material.dart';
 

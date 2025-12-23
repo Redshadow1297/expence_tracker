@@ -1,5 +1,5 @@
-import 'package:expence_tracker/Presentation/app_lables.dart';
-import 'package:expence_tracker/Presentation/custom_appbar.dart';
+import 'package:expence_tracker/CommonWidgets/app_lables.dart';
+import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

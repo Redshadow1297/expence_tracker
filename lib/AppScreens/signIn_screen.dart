@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:expence_tracker/Presentation/app_buittons.dart';
-import 'package:expence_tracker/Presentation/app_lables.dart';
-import 'package:expence_tracker/Presentation/app_snackbars.dart';
-import 'package:expence_tracker/Presentation/custom_appbar.dart';
+import 'package:expence_tracker/CommonWidgets/app_buittons.dart';
+import 'package:expence_tracker/CommonWidgets/app_lables.dart';
+import 'package:expence_tracker/CommonWidgets/app_snackbars.dart';
+import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -50,15 +50,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
           .ref()
           .child('profilePics')
           .child('$uid.jpg');
-
       UploadTask uploadTask = ref.putFile(
         file,
         SettableMetadata(contentType: 'image/jpeg'),
       );
-
       TaskSnapshot snapshot = await uploadTask;
       String downloadUrl = await snapshot.ref.getDownloadURL();
-
       return downloadUrl;
     } catch (e) {
       debugPrint("UPLOAD ERROR: $e");

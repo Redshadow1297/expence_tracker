@@ -1,6 +1,6 @@
-import 'package:expence_tracker/Presentation/app_buittons.dart';
-import 'package:expence_tracker/Presentation/app_snackbars.dart';
-import 'package:expence_tracker/Presentation/custom_appbar.dart';
+import 'package:expence_tracker/CommonWidgets/app_buittons.dart';
+import 'package:expence_tracker/CommonWidgets/app_snackbars.dart';
+import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

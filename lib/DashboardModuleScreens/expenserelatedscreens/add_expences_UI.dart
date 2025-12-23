@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expence_tracker/AppScreens/scanner_ui_screen.dart';
-import 'package:expence_tracker/Presentation/app_buittons.dart';
-import 'package:expence_tracker/Presentation/app_lables.dart';
-import 'package:expence_tracker/Presentation/app_snackbars.dart';
+import 'package:expence_tracker/CommonWidgets/app_buittons.dart';
+import 'package:expence_tracker/CommonWidgets/app_lables.dart';
+import 'package:expence_tracker/CommonWidgets/app_snackbars.dart';
 import 'package:expence_tracker/Utils/razor_pay_payments.dart';
-import 'package:expence_tracker/Presentation/custom_appbar.dart';
+import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
