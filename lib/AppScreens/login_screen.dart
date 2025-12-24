@@ -45,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (e.code == 'wrong-password') {
         AppSnackbar.warning("Wrong Password", "Enter correct password");
       } else {
-        print("FirebaseAuth Error: ${e.message}");
+        debugPrint("FirebaseAuth Error: ${e.message}");
 
         AppSnackbar.error(
           "Wrong credentials",

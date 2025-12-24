@@ -57,7 +57,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       
     } on FirebaseAuthException catch (e) {
         // ignore: avoid_print
-        print(e);
+        debugPrint(e.toString());
        AppSnackbar.error(
         "Error",
         "Something went wrong, Please try again later.",
