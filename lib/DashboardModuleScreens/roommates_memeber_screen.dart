@@ -67,10 +67,10 @@ class _RoomMembersState extends State<RoomMembers> {
                         CircleAvatar(
                           radius: 28,
                           backgroundImage:
-                              (member['profilePic'] != null &&
-                                  member['profilePic'].toString().isNotEmpty)
-                              ? NetworkImage(member['profilePic'])
-                              : const AssetImage('assets/user.png')
+                              // (member['profilePic'] != null &&
+                              //     member['profilePic'].toString().isNotEmpty)
+                              // ? NetworkImage(member['profilePic']) :
+                               const NetworkImage('https://docs.flutter.dev/assets/images/dash/dash-fainting.gif')
                                     as ImageProvider,
                         ),
                         const SizedBox(width: 12),

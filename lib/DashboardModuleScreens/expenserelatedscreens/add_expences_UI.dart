@@ -27,13 +27,10 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
   bool _isPaid = false;
   late PaymentController _paymentController = PaymentController();
 
-
-
   Future<void> addExpenses() async {
     try {
       Get.showOverlay(
-        asyncFunction: () async {
-        },
+        asyncFunction: () async {},
         loadingWidget: const Center(child: CircularProgressIndicator()),
       );
 
@@ -52,10 +49,7 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
         'uId': user.uid,
       });
 
-      AppSnackbar.success(
-        "Success",
-        "Expense added successfully",
-      );
+      AppSnackbar.success("Success", "Expense added successfully");
 
       setState(() {
         titleController.clear();
@@ -63,13 +57,10 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
         notesController.clear();
         selectedCategory = "Food";
         selectedDate = DateTime.now();
-        _isPaid = false;
+        // _isPaid = false;
       });
     } catch (e) {
-      AppSnackbar.error(
-        "Error",
-        e.toString(),
-      );
+      AppSnackbar.error("Error", e.toString());
     } finally {
       if (Get.isDialogOpen == true) {
         Get.back();
@@ -77,32 +68,52 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
     }
   }
 
+  void _onSavePressed() {
+    final amount = double.tryParse(amountController.text);
+
+    if (titleController.text.trim().isEmpty) {
+      AppSnackbar.error("Error", "Title is required");
+      return;
+    }
+
+    if (amount == null || amount <= 0) {
+      AppSnackbar.error("Error", "Enter a valid amount");
+      return;
+    }
+
+    // Payment is skipped → directly save
+    addExpenses();
+  }
+
   @override
-void initState() {
-  super.initState();
+  void initState() {
+    super.initState();
 
-  _paymentController = PaymentController(
-    onSuccess: () {
-      setState(() {
-        _isPaid = true;
-      });
+    // _paymentController = PaymentController(
+    //   onSuccess: () {
+    //     setState(() {
+    //       _isPaid = true;
+    //     });
+    //     AppSnackbar.success(
+    //       "Payment Successful",
+    //       "You can now save the expense",
+    //     );
+    //   },
+    // );
 
-      AppSnackbar.success(
-        "Payment Successful",
-        "You can now save the expense",
-      );
-    },
-  );
+    amountController.addListener(() {
+      setState(() {});
+    });
+  }
 
-  amountController.addListener(() {
-    setState(() {});
-  });
-}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 240, 245, 250),
-     appBar : CustomAppBar(title: "Add Expenses", subTitle: "You can add daily Expense here."),
+      appBar: CustomAppBar(
+        title: "Add Expenses",
+        subTitle: "You can add daily Expense here.",
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
@@ -115,7 +126,10 @@ void initState() {
               margin: const EdgeInsets.only(bottom: 20),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: AppLabel.title("Expense Details", Colors.deepPurpleAccent),
+                child: AppLabel.title(
+                  "Expense Details",
+                  Colors.deepPurpleAccent,
+                ),
               ),
             ),
 
@@ -202,6 +216,7 @@ void initState() {
             const SizedBox(height: 16),
             _buildTextField(notesController, "Notes", maxLines: 3),
             const SizedBox(height: 30),
+
             // Pay Button
             // ElevatedButton(
             //   onPressed: () {
@@ -237,43 +252,45 @@ void initState() {
             //     style: const TextStyle(fontSize: 18, color: Colors.white),
             //   ),
             // ),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.qr_code_scanner),
-              label: const Text("Scan & Pay"),
-              onPressed: () {
-                double amount = double.tryParse(amountController.text) ?? 0;
-                if (amount <= 0) {
-                  AppSnackbar.error(
-                    "Error",
-                    "Enter valid amount",
-                  );
-                  return;
-                }
-
-                Get.to(
-                  () => ScanUpiQrScreen(
-                    onUpiDetected: (upiId) {
-                      _paymentController.openUpiCheckout(
-                        amountInINR: amount.toInt(),
-                        upiId: upiId,
-                        onSuccess: () {
-                          setState(() {
-                            _isPaid = true;
-                          });
-                        },
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-
+            // ElevatedButton.icon(
+            //   icon: const Icon(Icons.qr_code_scanner),
+            //   label: const Text("Scan & Pay"),
+            //   onPressed: () {
+            //     double amount = double.tryParse(amountController.text) ?? 0;
+            //     if (amount <= 0) {
+            //       AppSnackbar.error(
+            //         "Error",
+            //         "Enter valid amount",
+            //       );
+            //       return;
+            //     }
+            //     // Get.to(
+            //     //   () => ScanUpiQrScreen(
+            //     //     onUpiDetected: (upiId) {
+            //     //       _paymentController.openUpiCheckout(
+            //     //         amountInINR: amount.toInt(),
+            //     //         upiId: upiId,
+            //     //         onSuccess: () {
+            //     //           setState(() {
+            //     //             _isPaid = true;
+            //     //           });
+            //     //         },
+            //     //       );
+            //     //     },
+            //     //   ),
+            //     // );
+            //   },
+            // ),
             const SizedBox(height: 30),
 
             // Save Button
-            AppButton(text: "Save Expenses", onPressed: _isPaid ? addExpenses : null, isLoading: false),
-            const SizedBox(height: 30),
+            AppButton(
+              text: "Save Expenses",
+              onPressed: _onSavePressed,
+              isLoading: false,
+            ),
 
+            const SizedBox(height: 30),
           ],
         ),
       ),
@@ -305,12 +322,11 @@ void initState() {
   }
 
   @override
-void dispose() {
-  _paymentController.dispose();
-  titleController.dispose();
-  amountController.dispose();
-  notesController.dispose();
-  super.dispose();
-}
-
+  void dispose() {
+    _paymentController.dispose();
+    titleController.dispose();
+    // amountController.dispose();
+    notesController.dispose();
+    super.dispose();
+  }
 }

@@ -27,6 +27,7 @@ dependencies:
   flutter_ai_chatbot: ^0.0.3
   http: ^1.6.0
   intl: ^0.20.2
+  flutter_launcher_icons: ^0.14.4
 
 
 dev_dependencies:
@@ -38,3 +39,10 @@ flutter:
   uses-material-design: true
   assets:
     - assets/lottie/expense_splash.json
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/Icons/AppIcons/expenses.png"
+  remove_alpha_ios: true
+

@@ -105,13 +105,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           CircleAvatar(
                             radius: 55,
                             backgroundImage:
-                                (userData?['profilePic'] != null &&
-                                    userData!['profilePic']
-                                        .toString()
-                                        .isNotEmpty)
-                                ? NetworkImage(userData!['profilePic'])
-                                : const AssetImage('assets/user.png')
-                                      as ImageProvider,
+                                // (userData?['profilePic'] != null &&
+                                //     userData!['profilePic']
+                                //         .toString()
+                                //         .isNotEmpty)
+                                // ? NetworkImage(userData!['profilePic'])
+                                // : const AssetImage('assets/user.png')
+                                //       as ImageProvider,
+                                const NetworkImage('https://docs.flutter.dev/assets/images/dash/dash-fainting.gif')
                           ),
                           const SizedBox(height: 12),
                           Text(
