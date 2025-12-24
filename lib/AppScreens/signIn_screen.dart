@@ -41,7 +41,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<String?> uploadProfilePic(String uid) async {
-    Get.snackbar("Error", "Under Development");
+    Get.snackbar("InProgress", "Image Uploading Under Development .");
     return null;
   //   if (pickedImage == null) return null;
 
@@ -110,25 +110,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
         barrierDismissible: false,
       );
 
-      // UserCredential uc = await _auth.createUserWithEmailAndPassword(
-      //   email: uMailId,
-      //   password: uPassword,
-      // );
-      // User? user = uc.user;
+      UserCredential uc = await _auth.createUserWithEmailAndPassword(
+        email: uMailId,
+        password: uPassword,
+      );
+      User? user = uc.user;
 
-      // String? profileUrl = await uploadProfilePic(user!.uid);
+      String? profileUrl = await uploadProfilePic(user!.uid);
 
-      // await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-      //   'firstName': uFirstName,
-      //   'lastName': uLastName,
-      //   'emailId': uMailId,
-      //   'mobileNumber': uMobileNumber,
-      //   'adhaarNumber': uAdharID,
-      //   'address': uAddress,
-      //   'profilePic': profileUrl ?? "",
-      //   'uId': user.uid,
-      //   'createdAt': FieldValue.serverTimestamp(),
-      // });
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'firstName': uFirstName,
+        'lastName': uLastName,
+        'emailId': uMailId,
+        'mobileNumber': uMobileNumber,
+        'adhaarNumber': uAdharID,
+        'address': uAddress,
+        'profilePic': profileUrl ?? "",
+        'uId': user.uid,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
 
       Get.back();
       clearAllFields();
