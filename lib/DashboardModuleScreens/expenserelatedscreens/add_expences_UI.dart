@@ -25,6 +25,35 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
 
+  /// Members
+  List<Map<String, dynamic>> members = [];
+  Set<String> presentMembers = {};
+  Set<String> absentMembers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    fetchMembers();
+  }
+
+  /// Fetch users from Firestore
+  Future<void> fetchMembers() async {
+    final snapshot = await _firestore.collection('users').get();
+
+    members = snapshot.docs.map((doc) {
+      return {
+        'uid': doc['uId'], // Use uId field, not doc.id
+        'name': doc['firstName'] + ' ' + doc['lastName'],
+      };
+    }).toList();
+
+    setState(() {
+      presentMembers = members.map((e) => e['uid'] as String).toSet();
+      absentMembers.clear();
+    });
+  }
+
+  /// Add Expense to Firestore
   Future<void> addExpenses() async {
     try {
       Get.showOverlay(
@@ -35,14 +64,35 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
       final user = _auth.currentUser;
       if (user == null) throw Exception("User not logged in");
 
+      if (presentMembers.isEmpty) {
+        throw Exception("At least one member must be present");
+      }
+
+      final totalAmount = double.parse(amountController.text);
+      final perPerson = totalAmount / presentMembers.length;
+
+      // Split details for each member
+      Map<String, double> splitDetails = {};
+
+      for (var uid in presentMembers) {
+        splitDetails[uid] = double.parse(perPerson.toStringAsFixed(2));
+      }
+
+      for (var uid in absentMembers) {
+        splitDetails[uid] = 0;
+      }
+
       await _firestore.collection('expenses').add({
         'title': titleController.text.trim(),
-        'amount': double.parse(amountController.text),
+        'amount': totalAmount,
         'category': selectedCategory,
         'notes': notesController.text.trim(),
-        'createdAt': FieldValue.serverTimestamp(),
         'expenseDate': selectedDate,
-        'uId': user.uid,
+        'createdAt': FieldValue.serverTimestamp(),
+        'paidBy': user.uid,
+        'presentMembers': presentMembers.toList(),
+        'absentMembers': absentMembers.toList(),
+        'splitDetails': splitDetails,
       });
 
       AppSnackbar.success("Success", "Expense added successfully");
@@ -54,6 +104,8 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
       setState(() {
         selectedCategory = "Food";
         selectedDate = DateTime.now();
+        presentMembers = members.map((e) => e['uid'] as String).toSet();
+        absentMembers.clear();
       });
     } catch (e) {
       AppSnackbar.error("Error", e.toString());
@@ -103,7 +155,6 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
     );
   }
 
-  // 🔹 Header Card (same style as Dashboard)
   Widget _headerCard() {
     return Card(
       elevation: 4,
@@ -126,7 +177,6 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
     );
   }
 
-  // 🔹 Form Section
   Widget _formSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,9 +184,7 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
         AppLabel.title("Expense Details", Colors.indigoAccent),
         const SizedBox(height: 12),
 
-        _inputCard(
-          child: _textField(titleController, "Title"),
-        ),
+        _inputCard(child: _textField(titleController, "Title")),
         const SizedBox(height: 12),
 
         _inputCard(
@@ -160,9 +208,7 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
               "Entertainment",
               "Groceries",
               "Other",
-            ]
-                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                .toList(),
+            ].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
             onChanged: (val) => setState(() => selectedCategory = val!),
           ),
         ),
@@ -186,7 +232,42 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
         _inputCard(
           child: _textField(notesController, "Notes", maxLines: 3),
         ),
+
+        const SizedBox(height: 16),
+        AppLabel.title("Members", Colors.purpleAccent),
+        const SizedBox(height: 8),
+        _memberSelectionUI(),
       ],
+    );
+  }
+
+  Widget _memberSelectionUI() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Column(
+        children: members.map((member) {
+          final uid = member['uid'];
+          final isPresent = presentMembers.contains(uid);
+
+          return SwitchListTile(
+            title: Text(member['name']),
+            subtitle: Text(isPresent ? "Present" : "Absent"),
+            value: isPresent,
+            onChanged: (val) {
+              setState(() {
+                if (val) {
+                  presentMembers.add(uid);
+                  absentMembers.remove(uid);
+                } else {
+                  presentMembers.remove(uid);
+                  absentMembers.add(uid);
+                }
+              });
+            },
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -215,10 +296,7 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        border: InputBorder.none,
-      ),
+      decoration: InputDecoration(labelText: label, border: InputBorder.none),
     );
   }
 

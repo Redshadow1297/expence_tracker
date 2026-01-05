@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class RoomMembers extends StatefulWidget {
@@ -11,39 +10,29 @@ class RoomMembers extends StatefulWidget {
 }
 
 class _RoomMembersState extends State<RoomMembers> {
+  Future<List<Map<String, dynamic>>> getAllRoomMembers() async {
+    // Fetch all users
+    QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('users').get();
 
-  Future<List<Map<String, dynamic>>> getRoomMembers() async {
-  final user = FirebaseAuth.instance.currentUser!;
-  final userDoc = await FirebaseFirestore.instance
-      .collection('users')
-      .doc(user.uid)
-      .get();
-
-  final roomId = userDoc['roomId'];
-
-  QuerySnapshot snapshot = await FirebaseFirestore.instance
-      .collection('users')
-      .where('roomId', isEqualTo: roomId)
-      .get();
-
-  return snapshot.docs
-      .map((doc) => {'id': doc.id, ...doc.data() as Map<String, dynamic>})
-      .toList();
-}
-
+    // Convert to list of maps
+    return snapshot.docs
+        .map((doc) => {'id': doc.id, ...doc.data() as Map<String, dynamic>})
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar: CustomAppBar(
+      backgroundColor: const Color.fromARGB(255, 240, 245, 250),
+      appBar: const CustomAppBar(
         title: "Room Members",
-        subTitle: "Get the contacts of your room members here.",
+        subTitle: "Contacts of all room members",
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: FutureBuilder<List<Map<String, dynamic>>>(
-          future: getRoomMembers(),
+          future: getAllRoomMembers(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -78,12 +67,11 @@ class _RoomMembersState extends State<RoomMembers> {
                       children: [
                         CircleAvatar(
                           radius: 28,
-                          backgroundImage:
-                              // (member['profilePic'] != null &&
-                              //     member['profilePic'].toString().isNotEmpty)
-                              // ? NetworkImage(member['profilePic']) :
-                               const NetworkImage('https://docs.flutter.dev/assets/images/dash/dash-fainting.gif')
-                                    as ImageProvider,
+                          backgroundImage: (member['profilePic'] != null &&
+                                  member['profilePic'].toString().isNotEmpty)
+                              ? NetworkImage(member['profilePic'])
+                              : const NetworkImage(
+                                  'https://docs.flutter.dev/assets/images/dash/dash-fainting.gif'),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -91,7 +79,7 @@ class _RoomMembersState extends State<RoomMembers> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "${member['firstName']} ${member['lastName']}",
+                                "${member['firstName'] ?? ''} ${member['lastName'] ?? ''}",
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 18,

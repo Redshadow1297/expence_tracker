@@ -20,7 +20,7 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 240, 245, 250),
-      appBar: CustomAppBar(
+      appBar: const CustomAppBar(
         title: "Settlements",
         subTitle: "Clear who owes whom",
       ),
@@ -43,12 +43,12 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
                   return const Center(child: Text("No expenses found"));
                 }
 
-                // Filter by selected period
                 final filteredDocs =
                     _filterByPeriod(snapshot.data!.docs, selectedPeriod);
 
                 if (filteredDocs.isEmpty) {
-                  return const Center(child: Text("No expenses in this period"));
+                  return const Center(
+                      child: Text("No expenses in this period"));
                 }
 
                 return ListView(
@@ -119,12 +119,15 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
   /// ---------------- SUMMARY CARD ----------------
   Widget _summaryCard(List<QueryDocumentSnapshot> docs) {
     double total = 0;
-    Set<String> users = {};
+    Set<String> members = {};
 
     for (var d in docs) {
       final data = d.data() as Map<String, dynamic>;
       total += (data['amount'] ?? 0).toDouble();
-      users.add(data['uId']);
+      final present = List<String>.from(data['presentMembers'] ?? []);
+      final absent = List<String>.from(data['absentMembers'] ?? []);
+      members.addAll(present);
+      members.addAll(absent); // include absent members
     }
 
     return Card(
@@ -136,24 +139,17 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Total Expenses",
-              style: TextStyle(color: Colors.white70),
-            ),
+            const Text("Total Expenses", style: TextStyle(color: Colors.white70)),
             const SizedBox(height: 8),
-            Text(
-              "₹${total.toStringAsFixed(2)}",
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text("₹${total.toStringAsFixed(2)}",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                )),
             const SizedBox(height: 6),
-            Text(
-              "Members: ${users.length}",
-              style: const TextStyle(color: Colors.white70),
-            ),
+            Text("Members: ${members.length}",
+                style: const TextStyle(color: Colors.white70)),
           ],
         ),
       ),
@@ -169,45 +165,64 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
       final Timestamp? t = data['createdAt'];
       final date = t?.toDate();
 
+      final presentMembers = List<String>.from(data['presentMembers'] ?? []);
+      final absentMembers = List<String>.from(data['absentMembers'] ?? []);
+      final splitDetails =
+          Map<String, dynamic>.from(data['splitDetails'] ?? {});
+
       return Card(
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.symmetric(vertical: 6),
-        child: ListTile(
+        child: ExpansionTile(
           leading: const Icon(Icons.receipt_long, color: Colors.deepPurple),
           title: AppLabel.body(category, Colors.black),
           subtitle: AppLabel.caption(
-            date != null ? date.toString().split(' ')[0] : 'N/A',
-            Colors.grey,
-          ),
+              date != null ? date.toString().split(' ')[0] : 'N/A',
+              Colors.grey),
           trailing: AppLabel.body("₹$amount", Colors.green),
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Present Members", style: TextStyle(fontWeight: FontWeight.bold)),
+                  ...presentMembers.map((uid) {
+                    final amt = splitDetails[uid]?.toDouble() ?? 0;
+                    return Text("$uid : ₹$amt");
+                  }),
+                  const SizedBox(height: 8),
+                  const Text("Absent Members", style: TextStyle(fontWeight: FontWeight.bold)),
+                  ...absentMembers.map((uid) => Text("$uid : ₹0")),
+                ],
+              ),
+            ),
+          ],
         ),
       );
     }).toList();
   }
 
-  /// ---------------- CALCULATE BALANCE ----------------
+  /// ---------------- CALCULATE BALANCE USING splitDetails ----------------
   Map<String, double> _calculateBalance(List<QueryDocumentSnapshot> docs) {
-    Map<String, double> paidByUser = {};
-    Set<String> userIds = {};
-    double total = 0;
+    Map<String, double> balance = {};
 
     for (var doc in docs) {
       final data = doc.data() as Map<String, dynamic>;
-      final uId = data['uId'];
-      final amount = (data['amount'] ?? 0).toDouble();
-      if (uId == null) continue;
+      final paidBy = data['paidBy'] as String?;
+      final splitDetails =
+          Map<String, dynamic>.from(data['splitDetails'] ?? {});
 
-      paidByUser[uId] = (paidByUser[uId] ?? 0) + amount;
-      userIds.add(uId);
-      total += amount;
-    }
+      if (paidBy == null) continue;
 
-    final share = total / userIds.length;
+      // Credit the payer
+      balance[paidBy] = (balance[paidBy] ?? 0) + (data['amount']?.toDouble() ?? 0);
 
-    Map<String, double> balance = {};
-    for (var uId in userIds) {
-      balance[uId] = (paidByUser[uId] ?? 0) - share;
+      // Debit each member (absent will have 0 automatically)
+      splitDetails.forEach((uid, amt) {
+        balance[uid] = (balance[uid] ?? 0) - (amt?.toDouble() ?? 0);
+      });
     }
 
     return balance;
@@ -241,9 +256,7 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
     final balance = _calculateBalance(docs);
     final settlements = _computeSettlements(balance);
 
-    if (settlements.isEmpty) return [
-      const Center(child: Text("No settlements needed"))
-    ];
+    if (settlements.isEmpty) return [const Center(child: Text("No settlements needed"))];
 
     return settlements.map((s) {
       return FutureBuilder<DocumentSnapshot>(
@@ -260,9 +273,7 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
 
               return Card(
                 elevation: 3,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 margin: const EdgeInsets.symmetric(vertical: 6),
                 child: ListTile(
                   leading: const Icon(Icons.swap_horiz, color: Colors.orange),

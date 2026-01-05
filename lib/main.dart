@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/addexpenses', page: () => AddExpenseUI()),
         GetPage(name: '/roommates', page: () => RoomMembers()),
         GetPage(name: '/settlements', page: () => SettlementsScreen()),
-        GetPage(name: '/reports', page: () => ReportsPage()),
+        GetPage(name: '/reports', page: () => ReportScreen()),
         GetPage(name: '/settings', page: () => Settings()),
       ],
       debugShowCheckedModeBanner: false,
