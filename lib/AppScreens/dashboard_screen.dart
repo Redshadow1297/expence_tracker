@@ -10,128 +10,67 @@ class DashboardScreen extends StatefulWidget {
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
-
-  User? get currentUser => FirebaseAuth.instance.currentUser;
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final List<Map<String, dynamic>> modules = [
-    {"title": "Profile", "icon": Icons.person},
-    {"title": "Expenses", "icon": Icons.receipt_long},
-    {"title": "Roommates", "icon": Icons.group},
-    {"title": "Settlements", "icon": Icons.swap_horiz},
-    {"title": "Reports", "icon": Icons.bar_chart},
-    {"title": "Settings", "icon": Icons.settings},
-  ];
-  
-  set welcomeText(String welcomeText) {
-    welcomeText = welcomeText;
-    
-  }
+  final User? currentUser = FirebaseAuth.instance.currentUser;
 
-  LinearGradient getRandomGradient() {
-    final gradients = [
-      LinearGradient(colors: [Color.fromARGB(255, 188, 208, 244), Color(0xFFbac8e0)]),
-      LinearGradient(colors: [Color(0xFF26C6DA), Color.fromARGB(255, 4, 226, 255)]),
-      LinearGradient(colors: [Color.fromARGB(255, 134, 173, 201), Color(0xFF0396FF)]),
-      LinearGradient(colors: [Color(0xFFFF9A8B), Color(0xFFFF6A88)]),
-      LinearGradient(colors: [Color.fromARGB(255, 137, 207, 204), Color(0xFF00FFCC)]),
-      LinearGradient(colors: [Color.fromARGB(255, 233, 255, 147), Color.fromARGB(255, 161, 255, 207)]),
-    ];
-    gradients.shuffle();
-    return gradients.first;
-  }
-  
+  final List<Map<String, dynamic>> modules = [
+    {"title": "Profile", "icon": Icons.person, "route": "/profile"},
+    {"title": "Roommates", "icon": Icons.group, "route": "/roommates"},
+    {"title": "Expenses", "icon": Icons.receipt_long, "route": "/showexpenses"},
+    {"title": "Settlements", "icon": Icons.account_balance_wallet, "route": "/settlements"},
+    {"title": "Reports", "icon": Icons.bar_chart, "route": "/reports"},
+    {"title": "Settings", "icon": Icons.settings, "route": "/forgetPassword"},
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar: CustomAppBar(title: "Dashboard", subTitle: "Manage your dashboard"),
-      body: SafeArea(
-        child: Stack(
+      backgroundColor: const Color.fromARGB(255, 240, 245, 250),
+      appBar: const CustomAppBar(
+        title: "Dashboard",
+        subTitle: "Manage your expenses",
+      ),
+
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _welcomeCard(),
+          const SizedBox(height: 20),
+          _quickActions(),
+          const SizedBox(height: 24),
+          AppLabel.title("More Options", Colors.indigoAccent),
+          const SizedBox(height: 12),
+          ...modules.map(_moduleTile).toList(),
+        ],
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFF097D94),
+        onPressed: _openChatBot,
+        child: const Icon(Icons.chat),
+      ),
+    );
+  }
+
+  // 🔹 Welcome Card
+  Widget _welcomeCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    elevation: 4,
-                    child: Container(
-                      padding: EdgeInsets.all(16),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        color: Colors.blue.shade50,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.dashboard,
-                            size: 40,
-                            color: Color.fromARGB(255, 9, 125, 148),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: AppLabel.title(
-                              "Welcome to Your Dashboard!",Colors.lightBlueAccent
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 20),
-
-                  // Modules Grid
-                  Expanded(
-                    child: GridView.builder(
-                      itemCount: modules.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                      ),
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                          onTap: () {
-                            Get.toNamed(
-                              modules[index]['title'].toString().toLowerCase(),
-                              preventDuplicates: true
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(15),
-                          child: buildModulesCard(
-                            modules[index]["title"],
-                            modules[index]["icon"],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Positioned(
-              bottom: 20,
-              right: 20,
-              child: SizedBox(
-                height: 200,
-                width: 150,
-                child: ChatBotWidget(
-                  apiKey: 'AIzaSyBOFiwEG4iveydThdNCtM_-MPC93ZVXVNY', 
-                  aiService:
-                      AIService.gemini,
-                  initialMessage: welcomeText = "👋 Hi! I’m here to help you with expenses, reports, and settings.",
-                  primaryColor: Color(0xFF097D94),
-                  chatIcon: Icons.chat, 
-                  clearHistoryOnClose: false,
-                  headerTitle: 'My Chattee',
-                  headerIcon: Icons.smart_toy,
+            const Icon(Icons.dashboard, size: 40, color: Color(0xFF097D94)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                "Welcome \nManage your room expenses smartly",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -141,34 +80,103 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget buildModulesCard(String moduleName, IconData icon) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      elevation: 4,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: getRandomGradient(),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 36, color: Colors.white),
-              SizedBox(height: 8),
-              Text(
-                moduleName,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+  // 🔹 Quick Actions
+  Widget _quickActions() {
+    return Row(
+      children: [
+        Expanded(
+          child: _quickActionCard(
+            title: "Add Expense",
+            icon: Icons.add,
+            color: Colors.green,
+            route: "/addexpenses",
           ),
         ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _quickActionCard(
+            title: "Settlements",
+            icon: Icons.swap_horiz,
+            color: Colors.orange,
+            route: "/settlements",
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _quickActionCard({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required String route,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () => Get.toNamed(route),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 32, color: Colors.white),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  // 🔹 Module List Tile
+  Widget _moduleTile(Map<String, dynamic> module) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: Icon(module['icon'], color: const Color(0xFF097D94)),
+        title: Text(
+          module['title'],
+          style: const TextStyle(fontWeight: FontWeight.w500),
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () => Get.toNamed(module['route']),
+      ),
+    );
+  }
+
+  // 🔹 ChatBot Bottom Sheet
+  void _openChatBot() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.7,
+          child: ChatBotWidget(
+            apiKey: 'YOUR_GEMINI_API_KEY',
+            aiService: AIService.gemini,
+            initialMessage:
+                " Hi! I can help you with expenses, settlements, and reports.",
+            primaryColor: const Color(0xFF097D94),
+            headerTitle: 'Expense Assistant',
+            headerIcon: Icons.smart_toy,
+          ),
+        );
+      },
     );
   }
 }

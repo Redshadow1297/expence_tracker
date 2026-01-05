@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:expence_tracker/AppScreens/scanner_ui_screen.dart';
 import 'package:expence_tracker/CommonWidgets/app_buittons.dart';
 import 'package:expence_tracker/CommonWidgets/app_lables.dart';
 import 'package:expence_tracker/CommonWidgets/app_snackbars.dart';
-import 'package:expence_tracker/Utils/razor_pay_payments.dart';
 import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,19 +11,19 @@ class AddExpenseUI extends StatefulWidget {
   const AddExpenseUI({super.key});
 
   @override
-  _AddExpenseUIState createState() => _AddExpenseUIState();
+  State<AddExpenseUI> createState() => _AddExpenseUIState();
 }
 
 class _AddExpenseUIState extends State<AddExpenseUI> {
   String selectedCategory = "Food";
   DateTime selectedDate = DateTime.now();
-  TextEditingController titleController = TextEditingController();
-  TextEditingController amountController = TextEditingController();
-  TextEditingController notesController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  bool _isPaid = false;
-  late PaymentController _paymentController = PaymentController();
+
+  final titleController = TextEditingController();
+  final amountController = TextEditingController();
+  final notesController = TextEditingController();
+
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
 
   Future<void> addExpenses() async {
     try {
@@ -34,10 +32,8 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
         loadingWidget: const Center(child: CircularProgressIndicator()),
       );
 
-      User? user = _auth.currentUser;
-      if (user == null) {
-        throw Exception("User not logged in");
-      }
+      final user = _auth.currentUser;
+      if (user == null) throw Exception("User not logged in");
 
       await _firestore.collection('expenses').add({
         'title': titleController.text.trim(),
@@ -51,20 +47,18 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
 
       AppSnackbar.success("Success", "Expense added successfully");
 
+      titleController.clear();
+      amountController.clear();
+      notesController.clear();
+
       setState(() {
-        titleController.clear();
-        amountController.clear();
-        notesController.clear();
         selectedCategory = "Food";
         selectedDate = DateTime.now();
-        // _isPaid = false;
       });
     } catch (e) {
       AppSnackbar.error("Error", e.toString());
     } finally {
-      if (Get.isDialogOpen == true) {
-        Get.back();
-      }
+      if (Get.isDialogOpen == true) Get.back();
     }
   }
 
@@ -81,251 +75,169 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
       return;
     }
 
-    // Payment is skipped → directly save
     addExpenses();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    // _paymentController = PaymentController(
-    //   onSuccess: () {
-    //     setState(() {
-    //       _isPaid = true;
-    //     });
-    //     AppSnackbar.success(
-    //       "Payment Successful",
-    //       "You can now save the expense",
-    //     );
-    //   },
-    // );
-
-    amountController.addListener(() {
-      setState(() {});
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar: CustomAppBar(
-        title: "Add Expenses",
-        subTitle: "You can add daily Expense here.",
+      backgroundColor: const Color.fromARGB(255, 240, 245, 250),
+      appBar: const CustomAppBar(
+        title: "Add Expense",
+        subTitle: "Record your daily spending",
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              elevation: 4,
-              margin: const EdgeInsets.only(bottom: 20),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: AppLabel.title(
-                  "Expense Details",
-                  Colors.deepPurpleAccent,
-                ),
-              ),
-            ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _headerCard(),
+          const SizedBox(height: 20),
+          _formSection(),
+          const SizedBox(height: 30),
+          AppButton(
+            text: "Save Expense",
+            onPressed: _onSavePressed,
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
 
-            _buildTextField(titleController, "Title"),
-            const SizedBox(height: 16),
-            _buildTextField(amountController, "Amount", isNumber: true),
-            const SizedBox(height: 16),
-
-            // Category Dropdown
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: DropdownButtonFormField<String>(
-                  value: selectedCategory,
-                  decoration: const InputDecoration(border: InputBorder.none),
-                  items:
-                      [
-                            "Food",
-                            "Travel",
-                            "Shopping",
-                            "Bills",
-                            "Entertainment",
-                            "Groceries",
-                            "Other",
-                          ]
-                          .map(
-                            (cat) =>
-                                DropdownMenuItem(value: cat, child: Text(cat)),
-                          )
-                          .toList(),
-                  onChanged: (value) {
-                    setState(() => selectedCategory = value!);
-                  },
-                ),
+  // 🔹 Header Card (same style as Dashboard)
+  Widget _headerCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: const [
+            Icon(Icons.receipt_long, size: 36, color: Color(0xFF097D94)),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                "Add a new expense\nKeep track of your money",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            // Date Picker
-            GestureDetector(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime(2050),
-                  initialDate: selectedDate,
-                );
-                if (picked != null) {
-                  setState(() => selectedDate = picked);
-                }
-              },
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 2,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 12,
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.calendar_today_rounded,
-                        color: Colors.deepPurple,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-            _buildTextField(notesController, "Notes", maxLines: 3),
-            const SizedBox(height: 30),
-
-            // Pay Button
-            // ElevatedButton(
-            //   onPressed: () {
-            //     double amount = double.tryParse(amountController.text) ?? 0;
-            //     if (amount <= 0) {
-            //       Get.snackbar(
-            //         "Error",
-            //         "Please enter a valid amount",
-            //         backgroundColor: Colors.red,
-            //         colorText: Colors.white,
-            //       );
-            //       return;
-            //     }
-            //     PaymentController().openCheckout(
-            //       amountInINR: amount.toInt(),
-            //       orderId: '',
-            //       onSuccess: () {
-            //         setState(() {
-            //           _isPaid = true;
-            //         });
-            //       },
-            //     );
-            //   },
-            //   style: ElevatedButton.styleFrom(
-            //     backgroundColor: Colors.greenAccent.shade700,
-            //     padding: const EdgeInsets.symmetric(vertical: 16),
-            //     shape: RoundedRectangleBorder(
-            //       borderRadius: BorderRadius.circular(12),
-            //     ),
-            //   ),
-            //   child: Text(
-            //     "Pay ₹${amountController.text.isEmpty ? '0' : amountController.text}",
-            //     style: const TextStyle(fontSize: 18, color: Colors.white),
-            //   ),
-            // ),
-            // ElevatedButton.icon(
-            //   icon: const Icon(Icons.qr_code_scanner),
-            //   label: const Text("Scan & Pay"),
-            //   onPressed: () {
-            //     double amount = double.tryParse(amountController.text) ?? 0;
-            //     if (amount <= 0) {
-            //       AppSnackbar.error(
-            //         "Error",
-            //         "Enter valid amount",
-            //       );
-            //       return;
-            //     }
-            //     // Get.to(
-            //     //   () => ScanUpiQrScreen(
-            //     //     onUpiDetected: (upiId) {
-            //     //       _paymentController.openUpiCheckout(
-            //     //         amountInINR: amount.toInt(),
-            //     //         upiId: upiId,
-            //     //         onSuccess: () {
-            //     //           setState(() {
-            //     //             _isPaid = true;
-            //     //           });
-            //     //         },
-            //     //       );
-            //     //     },
-            //     //   ),
-            //     // );
-            //   },
-            // ),
-            const SizedBox(height: 30),
-
-            // Save Button
-            AppButton(
-              text: "Save Expenses",
-              onPressed: _onSavePressed,
-              isLoading: false,
-            ),
-
-            const SizedBox(height: 30),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTextField(
-    TextEditingController controller,
-    String label, {
-    bool isNumber = false,
-    int maxLines = 1,
-  }) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: TextField(
-          controller: controller,
-          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-          maxLines: maxLines,
-          decoration: InputDecoration(
-            labelText: label,
-            border: InputBorder.none,
+  // 🔹 Form Section
+  Widget _formSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AppLabel.title("Expense Details", Colors.indigoAccent),
+        const SizedBox(height: 12),
+
+        _inputCard(
+          child: _textField(titleController, "Title"),
+        ),
+        const SizedBox(height: 12),
+
+        _inputCard(
+          child: _textField(
+            amountController,
+            "Amount",
+            keyboardType: TextInputType.number,
           ),
+        ),
+        const SizedBox(height: 12),
+
+        _inputCard(
+          child: DropdownButtonFormField<String>(
+            value: selectedCategory,
+            decoration: const InputDecoration(border: InputBorder.none),
+            items: const [
+              "Food",
+              "Travel",
+              "Shopping",
+              "Bills",
+              "Entertainment",
+              "Groceries",
+              "Other",
+            ]
+                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                .toList(),
+            onChanged: (val) => setState(() => selectedCategory = val!),
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        _inputCard(
+          onTap: _pickDate,
+          child: Row(
+            children: [
+              const Icon(Icons.calendar_today, color: Colors.blue),
+              const SizedBox(width: 12),
+              Text(
+                "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        _inputCard(
+          child: _textField(notesController, "Notes", maxLines: 3),
+        ),
+      ],
+    );
+  }
+
+  Widget _inputCard({required Widget child, VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: child,
         ),
       ),
     );
   }
 
+  Widget _textField(
+    TextEditingController controller,
+    String label, {
+    TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        border: InputBorder.none,
+      ),
+    );
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2050),
+      initialDate: selectedDate,
+    );
+    if (picked != null) {
+      setState(() => selectedDate = picked);
+    }
+  }
+
   @override
   void dispose() {
-    _paymentController.dispose();
     titleController.dispose();
-    // amountController.dispose();
+    amountController.dispose();
     notesController.dispose();
     super.dispose();
   }

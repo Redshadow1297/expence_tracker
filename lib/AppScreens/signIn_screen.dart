@@ -44,10 +44,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     Get.snackbar("InProgress", "Image Uploading Under Development .");
     return null;
   //   if (pickedImage == null) return null;
-
   //   try {
   //     File file = File(pickedImage!.path);
-
   //     final ref = FirebaseStorage.instance
   //         .ref()
   //         .child('profilePics')

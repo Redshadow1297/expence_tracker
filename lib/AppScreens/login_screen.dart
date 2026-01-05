@@ -4,7 +4,6 @@ import 'package:expence_tracker/CommonWidgets/app_snackbars.dart';
 import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
 import 'package:expence_tracker/auth_BLoC/auth_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -21,7 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   LoginBloc loginBloc = LoginBloc();
-  BlocProvider? blocProvider;
 
   Future<void> getLoggedIn(String username, String password) async {
     try {
@@ -41,23 +39,16 @@ class _LoginScreenState extends State<LoginScreen> {
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         AppSnackbar.error("User not found", "Enter correct email");
-      }
-      if (e.code == 'wrong-password') {
+      } else if (e.code == 'wrong-password') {
         AppSnackbar.warning("Wrong Password", "Enter correct password");
       } else {
-        debugPrint("FirebaseAuth Error: ${e.message}");
-
-        AppSnackbar.error(
-          "Wrong credentials",
-          "Enter correct username or password",
-        );
+        AppSnackbar.error("Error", e.message ?? "Something went wrong");
       }
     } catch (ex) {
       AppSnackbar.error("Error", ex.toString());
     }
   }
 
-  // Check if user is already logged in
   void _checkUserLogin() async {
     User? user = _auth.currentUser;
     if (user != null) {
@@ -72,125 +63,127 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _checkUserLogin();
-    // getLoggedIn(userNameController.text, passwordController.text);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar : CustomAppBar(title: "Expense Tracker", subTitle: "You can Login from here."),
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(
+        title: "Expense Tracker",
+        subTitle: "Login to manage your expenses",
+      ),
       body: SafeArea(
-        child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Form(
             key: _formKey,
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "Welcome Buddy!",
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: const Color.from(
-                        alpha: 1,
-                        red: 0.035,
-                        green: 0.49,
-                        blue: 0.58,
-                      ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 30),
+                Text(
+                  "Welcome Buddy!",
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF096A94),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Sign in to continue",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                SizedBox(height: 40),
+
+                // Email Field
+                TextFormField(
+                  controller: userNameController,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value!.isEmpty) return "Enter your email";
+                    if (!RegExp(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$")
+                        .hasMatch(value)) return "Enter a valid email";
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.email_outlined, color: Colors.blueAccent),
+                    hintText: "Email",
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
                     ),
                   ),
-                  SizedBox(height: 40),
-                  TextFormField(
-                    controller: userNameController,
-                    autofocus: true,
-                    validator: (value) {
-                      if (value!.isEmpty) return "Enter your mail id";
-                      if (!RegExp(
-                        r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$",
-                      ).hasMatch(value)) {
-                        return "Enter valid email";
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.email_outlined),
-                      hintText: "Enter Username",
-                      // errorText: "Please Enter Valid Username",
-                      // errorBorder: OutlineInputBorder(
-                      //   // borderSide: BorderSide(color: Colors.red),
-                      // ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                ),
+                SizedBox(height: 20),
+
+                // Password Field
+                TextFormField(
+                  controller: passwordController,
+                  obscureText: true,
+                  validator: (value) => value!.isEmpty ? "Enter password" : null,
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.lock_outline, color: Colors.blueAccent),
+                    hintText: "Password",
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
                     ),
                   ),
-                  SizedBox(height: 20),
-                  TextFormField(
-                    controller: passwordController,
-                    obscureText: true,
-                    autofocus: true,
-                    validator: (value) {
-                      if (value!.isEmpty) return "Enter Password";
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.remove_red_eye_outlined),
-                      hintText: "Enter Password",
-                      // errorText: "Please Enter Valid Password",
-                      // errorBorder: OutlineInputBorder(
-                      //   // borderSide: BorderSide(color: Colors.red),
-                      // ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 38),
-                  AppButton(text: "LogIn", onPressed: () {
+                ),
+                SizedBox(height: 30),
+
+                // Login Button
+                AppButton(
+                  text: "Login",
+                  onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       getLoggedIn(
                         userNameController.text.trim(),
                         passwordController.text.trim(),
                       );
-                  }
-                  }),
-                  SizedBox(height: 40),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                     AppLabel.body( "Don't have an account?", Colors.black54),
-                      SizedBox(width: 20),
-                      InkWell(
-                        onTap: () {
-                          // GetX
-                          Get.toNamed('/signIn');
-                        },
-                        child: Text(
-                          "SignUp",
-                          style: TextStyle(
-                            color: Colors.blueAccent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 21,
-                          ),
+                    }
+                  },
+                ),
+                SizedBox(height: 20),
+
+                // SignUp Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AppLabel.body("Don't have an account?", Colors.black54),
+                    SizedBox(width: 8),
+                    InkWell(
+                      onTap: () => Get.toNamed('/signIn'),
+                      child: Text(
+                        "Sign Up",
+                        style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 30),
 
-                  SizedBox(height: 100),
-
-                  InkWell(
-                    onTap: () {
-                      Get.toNamed('/forgetPassword');
-                    },
-                    child: AppLabel.body( "Forgot Password?", Colors.blueAccent),
-                  ),
-                ],
-              ),
+                // Forgot Password
+                InkWell(
+                  onTap: () => Get.toNamed('/forgetPassword'),
+                  child: AppLabel.body("Forgot Password?", Colors.blueAccent),
+                ),
+                SizedBox(height: 50),
+              ],
             ),
           ),
         ),

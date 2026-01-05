@@ -17,77 +17,60 @@ class ExpensesScreen extends StatefulWidget {
 class _ExpensesScreenState extends State<ExpensesScreen> {
   String selectedMonth = "${DateTime.now().month}-${DateTime.now().year}";
 
-  // Month dropdown widget
-  Widget buildMonthDropdown() {
+  // Month Dropdown
+  Widget _monthDropdown() {
     return DropdownButton<String>(
       value: selectedMonth,
+      underline: const SizedBox(),
       items: List.generate(12, (i) {
-        final monthYear = "${i + 1}-${DateTime.now().year}";
+        final value = "${i + 1}-${DateTime.now().year}";
         return DropdownMenuItem(
-          value: monthYear,
-          child: Text("Month ${i + 1}"),
+          value: value,
+          child: Text(DateFormat.MMMM().format(DateTime(0, i + 1))),
         );
       }),
-      onChanged: (value) {
-        setState(() => selectedMonth = value!);
-      },
+      onChanged: (val) => setState(() => selectedMonth = val!),
     );
   }
 
-  // Filter expenses by month
-  List<QueryDocumentSnapshot> filterByMonth(
+  List<QueryDocumentSnapshot> _filterByMonth(
     List<QueryDocumentSnapshot> docs,
-    String monthYear,
   ) {
-    final parts = monthYear.split('-');
+    final parts = selectedMonth.split('-');
     final month = int.parse(parts[0]);
     final year = int.parse(parts[1]);
 
     return docs.where((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      final date = (data['expenseDate'] as Timestamp).toDate();
+      final date = (doc['expenseDate'] as Timestamp).toDate();
       return date.month == month && date.year == year;
     }).toList();
   }
 
-  // Total spent per category (if needed later)
-  Map<String, double> calculateCategoryTotals(
-    List<QueryDocumentSnapshot> docs,
-  ) {
-    Map<String, double> categoryTotals = {};
-    for (var doc in docs) {
-      final data = doc.data() as Map<String, dynamic>;
-      final category = data['category'] ?? 'Other';
-      final amount = (data['amount'] as num).toDouble();
-      categoryTotals[category] = (categoryTotals[category] ?? 0) + amount;
-    }
-    return categoryTotals;
-  }
+  Widget _expenseTile(Map<String, dynamic> data) {
+    final date =
+        DateFormat('dd MMM yyyy').format((data['expenseDate'] as Timestamp).toDate());
 
-  // Single expense tile
-  Widget _buildExpenseTile(
-    String title,
-    String category,
-    String amount,
-    String date,
-  ) {
     return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        leading: Icon(Icons.circle, size: 12, color: Colors.deepPurple),
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(category, style: TextStyle(color: Colors.grey)),
-            Text(date, style: TextStyle(color: Colors.grey)),
-          ],
+        leading: CircleAvatar(
+          radius: 18,
+          backgroundColor: Colors.deepPurple.shade100,
+          child: const Icon(Icons.receipt, color: Colors.deepPurple),
         ),
+        title: Text(
+          data['title'] ?? '',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        subtitle: Text("${data['category']} • $date"),
         trailing: Text(
-          "₹$amount",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          "₹${data['amount']}",
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
       ),
     );
@@ -98,41 +81,21 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     final userId = FirebaseAuth.instance.currentUser!.uid;
 
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar : CustomAppBar(title: "Expenses", subTitle: "Manage your monthly and daily expenses here"),
-      // appBar: AppBar(
-      //   automaticallyImplyLeading: false,
-      //   backgroundColor: const Color(0xFF097D94),
-      //   elevation: 4,
-      //   title: Column(
-      //     crossAxisAlignment: CrossAxisAlignment.start,
-      //     children: const [
-      //       Text(
-      //         "Expenses",
-      //         style: TextStyle(
-      //           color: Colors.white,
-      //           fontWeight: FontWeight.bold,
-      //         ),
-      //       ),
-      //       SizedBox(height: 2),
-      //       Text(
-      //         "Manage your monthly and daily expenses here",
-      //         style: TextStyle(fontSize: 12, color: Colors.white70),
-      //       ),
-      //     ],
-      //   ),
-      // ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.to(AddExpenseUI()),
-        backgroundColor: Colors.deepPurple,
-        child: const Icon(Icons.add, color: Colors.white),
+      backgroundColor: const Color.fromARGB(255, 240, 245, 250),
+      appBar: const CustomAppBar(
+        title: "Expenses",
+        subTitle: "Track and manage your spending",
       ),
-
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Get.to(() => const AddExpenseUI()),
+        backgroundColor: Colors.deepPurple,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text("Add Expense", style: TextStyle(color: Colors.white)),
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('expenses')
             .where('uId', isEqualTo: userId)
-            // .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -140,13 +103,14 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: AppLabel.body("No expenses added yet", Colors.black54),);
+            return Center(
+              child: AppLabel.body("No expenses added yet", Colors.black54),
+            );
           }
 
-          final allDocs = snapshot.data!.docs;
-          final filteredDocs = filterByMonth(allDocs, selectedMonth);
+          final filteredDocs = _filterByMonth(snapshot.data!.docs);
 
-          double totalSpent = filteredDocs.fold(
+          final totalSpent = filteredDocs.fold<double>(
             0,
             (sum, doc) => sum + (doc['amount'] as num).toDouble(),
           );
@@ -154,38 +118,62 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // Month Filter Card
+              // 🔹 Header Summary
               Card(
+                elevation: 4,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                elevation: 3,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
+                  padding: const EdgeInsets.all(16),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        "Month Filter:",
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      const Icon(Icons.bar_chart, size: 36, color: Color(0xFF097D94)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          "Overview of your monthly expenses",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                      buildMonthDropdown(),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
-              // Total Spent Card
+              // 🔹 Month Filter
               Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Select Month",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      _monthDropdown(),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // 🔹 Total Spent
+              Card(
+                elevation: 4,
+                color: Colors.green.shade600,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                elevation: 3,
-                color: const Color.fromARGB(178, 5, 147, 2),
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
@@ -193,7 +181,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     children: [
                       const Text(
                         "Total Spent",
-                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                        style: TextStyle(color: Colors.white70),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -208,35 +196,18 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
-              // Category-wise placeholder
-              const Text(
-                "Category-wise Expenses",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              // SizedBox(height: 200, child: buildPieChart(categoryTotals)),
-              const SizedBox(height: 20),
-
-              // Recent Expenses
+              // 🔹 Recent Expenses
               const Text(
                 "Recent Expenses",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 10),
-              ...filteredDocs.map((doc) {
-                final data = doc.data() as Map<String, dynamic>;
-                final date = (data['expenseDate'] as Timestamp).toDate();
-                final formattedDate = DateFormat('dd MMM yyyy').format(date);
-
-                return _buildExpenseTile(
-                  data['title'] ?? '',
-                  data['category'] ?? '',
-                  data['amount'].toString(),
-                  formattedDate,
-                );
-              }).toList(),
+              const SizedBox(height: 12),
+              ...filteredDocs.map(
+                (doc) => _expenseTile(doc.data() as Map<String, dynamic>),
+              ),
+              const SizedBox(height: 80),
             ],
           );
         },

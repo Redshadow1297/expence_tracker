@@ -3,6 +3,7 @@ import 'package:expence_tracker/AppScreens/dashboard_screen.dart';
 import 'package:expence_tracker/AppScreens/login_screen.dart';
 import 'package:expence_tracker/AppScreens/signIn_screen.dart';
 import 'package:expence_tracker/AppScreens/splash_screen.dart';
+import 'package:expence_tracker/DashboardModuleScreens/expenserelatedscreens/add_expences_UI.dart';
 import 'package:expence_tracker/DashboardModuleScreens/expenses_screen.dart';
 import 'package:expence_tracker/DashboardModuleScreens/profile_screen.dart';
 import 'package:expence_tracker/DashboardModuleScreens/reports_screen.dart';
@@ -41,7 +42,8 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/signIn', page: () => SignUpScreen()),
         GetPage(name: '/dashboard', page: () => DashboardScreen()),
         GetPage(name: '/profile', page: () => UserProfileScreen()),
-        GetPage(name: '/expenses', page: () => ExpensesScreen()),
+        GetPage(name: '/showexpenses', page: () => ExpensesScreen()),
+        GetPage(name: '/addexpenses', page: () => AddExpenseUI()),
         GetPage(name: '/roommates', page: () => RoomMembers()),
         GetPage(name: '/settlements', page: () => SettlementsScreen()),
         GetPage(name: '/reports', page: () => ReportsPage()),

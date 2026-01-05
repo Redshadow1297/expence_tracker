@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class RoomMembers extends StatefulWidget {
@@ -10,15 +11,26 @@ class RoomMembers extends StatefulWidget {
 }
 
 class _RoomMembersState extends State<RoomMembers> {
-  Future<List<Map<String, dynamic>>> getRoomMembers() async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .get();
 
-    return snapshot.docs
-        .map((doc) => {'id': doc.id, ...doc.data() as Map<String, dynamic>})
-        .toList();
-  }
+  Future<List<Map<String, dynamic>>> getRoomMembers() async {
+  final user = FirebaseAuth.instance.currentUser!;
+  final userDoc = await FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .get();
+
+  final roomId = userDoc['roomId'];
+
+  QuerySnapshot snapshot = await FirebaseFirestore.instance
+      .collection('users')
+      .where('roomId', isEqualTo: roomId)
+      .get();
+
+  return snapshot.docs
+      .map((doc) => {'id': doc.id, ...doc.data() as Map<String, dynamic>})
+      .toList();
+}
+
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expence_tracker/CommonWidgets/app_buittons.dart';
-import 'package:expence_tracker/CommonWidgets/app_lables.dart';
 import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -26,170 +25,182 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Future<void> fetchUserData() async {
     try {
-      User? user = FirebaseAuth.instance.currentUser;
+      final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        DocumentSnapshot doc = await FirebaseFirestore.instance
+        userData = await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
             .get();
-        if (doc.exists) {
-          setState(() {
-            userData = doc;
-            isLoading = false;
-          });
-        } else {
-          setState(() {
-            errorMessage = "User data not found.";
-            isLoading = false;
-          });
-        }
-      } else {
-        setState(() {
-          errorMessage = "No user logged in.";
-          isLoading = false;
-        });
       }
     } catch (e) {
-      setState(() {
-        errorMessage = "Error fetching user data: $e";
-        isLoading = false;
-      });
+      errorMessage = "Unable to load profile";
     }
+    setState(() => isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 240, 245, 250),
-      appBar: CustomAppBar(
-        title: "User Profile",
-        subTitle: "You can handle your profile here.",
+      backgroundColor: const Color(0xFFF6F8FC),
+      appBar: const CustomAppBar(
+        title: "Profile",
+        subTitle: "Your account information",
       ),
-      body: SafeArea(
-        child: isLoading
-            ? const Center(
-                child: CircularProgressIndicator(color: Color(0xFF097D94)),
-              )
-            : errorMessage.isNotEmpty
-            ? Center(
-                child: Text(
-                  errorMessage,
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
-                ),
-              )
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    // Top Gradient Profile Card
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 4,
-                            offset: Offset(2, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : errorMessage.isNotEmpty
+              ? Center(child: Text(errorMessage))
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      _compactHeader(),
+                      const SizedBox(height: 20),
+                      _sectionCard(
+                        title: "Personal Details",
                         children: [
-                          CircleAvatar(
-                            radius: 55,
-                            backgroundImage:
-                                // (userData?['profilePic'] != null &&
-                                //     userData!['profilePic']
-                                //         .toString()
-                                //         .isNotEmpty)
-                                // ? NetworkImage(userData!['profilePic'])
-                                // : const AssetImage('assets/user.png')
-                                //       as ImageProvider,
-                                const NetworkImage('https://docs.flutter.dev/assets/images/dash/dash-fainting.gif')
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            "${userData?['firstName']} ${userData?['lastName']}",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            userData?['emailId'] ?? '',
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                            ),
-                          ),
+                          infoTile(Icons.person, "First Name",
+                              userData?['firstName']),
+                          infoTile(Icons.person_outline, "Last Name",
+                              userData?['lastName']),
+                          infoTile(Icons.email_outlined, "Email",
+                              userData?['emailId']),
+                          infoTile(Icons.phone_android, "Mobile",
+                              userData?['mobileNumber']),
                         ],
                       ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // Info Card
-                    Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
+                      const SizedBox(height: 16),
+                      _sectionCard(
+                        title: "Address",
+                        children: [
+                          infoTile(Icons.location_on_outlined, "Address",
+                              userData?['address']),
+                        ],
                       ),
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            AppLabel.title(
-                              "Personal Information",
-                              Colors.deepPurpleAccent,
-                            ),
-                            const SizedBox(height: 15),
-                            infoRow("First Name", userData?['firstName']),
-                            infoRow("Last Name", userData?['lastName']),
-                            infoRow("Email Id", userData?['emailId']),
-                            infoRow("Address", userData?['address']),
-                            infoRow("Mobile No.", userData?['mobileNumber']),
-                            infoRow("Aadhaar No.", userData?['adhaarNumber']),
-                          ],
-                        ),
+                      const SizedBox(height: 32),
+                      AppButton(
+                        text: "Logout",
+                        onPressed: () async {
+                          await FirebaseAuth.instance.signOut();
+                          Get.offAllNamed('/LoginPage');
+                        },
                       ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    // Logout Button
-                    AppButton(
-                      text: "LogOut",
-                      onPressed: () async {
-                        await FirebaseAuth.instance.signOut();
-                        Get.offAllNamed('/LoginPage');
-                      },
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+    );
+  }
+
+  /// ---------- COMPACT HEADER ----------
+  Widget _compactHeader() {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const CircleAvatar(
+            radius: 28,
+            backgroundColor: Color(0xFFEEF2FF),
+            child: Icon(Icons.person, size: 30, color: Colors.indigo),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${userData?['firstName']} ${userData?['lastName']}",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  userData?['emailId'] ?? '',
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget infoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+  /// ---------- SECTION CARD ----------
+  Widget _sectionCard({
+    required String title,
+    required List<Widget> children,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(flex: 3, child: AppLabel.body("$label :", Colors.black12)),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.indigo,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...children,
+        ],
+      ),
+    );
+  }
 
-          Expanded(flex: 5, child: AppLabel.body(value, Colors.black87)),
+  /// ---------- INFO TILE ----------
+  Widget infoTile(IconData icon, String label, dynamic value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: Colors.indigo),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 13,
+              ),
+            ),
+          ),
+          Text(
+            value?.toString() ?? "-",
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
         ],
       ),
     );
