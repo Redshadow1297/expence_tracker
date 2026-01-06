@@ -50,6 +50,9 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/settings', page: () => Settings()),
       ],
       debugShowCheckedModeBanner: false,
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: ThemeMode.system, //auto theme mode
       home: ExpenseSplash(),
     );
   }
