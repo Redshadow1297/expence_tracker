@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expence_tracker/CommonWidgets/app_lables.dart';
 import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_ai_chatbot/flutter_ai_chatbot.dart';
@@ -23,6 +25,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {"title": "Reports", "icon": Icons.bar_chart, "route": "/reports"},
     {"title": "Settings", "icon": Icons.settings, "route": "/forgetPassword"},
   ];
+
+
+  @override
+void initState() {
+  super.initState();
+  initFCM();
+}
+
+
+
+//---------------------------------- FCM Initialization ------------------
+
+Future<void> initFCM() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  await messaging.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  final token = await messaging.getToken();
+  if (token == null) return;
+
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
+
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .set(
+    {'fcmToken': token},
+    SetOptions(merge: true),
+  );
+
+  debugPrint("FCM Token saved");
+}
+
 
   @override
   Widget build(BuildContext context) {

@@ -6,6 +6,7 @@ import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+  import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AddExpenseUI extends StatefulWidget {
   const AddExpenseUI({super.key});
@@ -24,6 +25,7 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
 
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
+  
 
   /// Members
   List<Map<String, dynamic>> members = [];
@@ -34,7 +36,39 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
   void initState() {
     super.initState();
     fetchMembers();
+     saveFcmToken(); //FCM TOKEN SAVE FUNCTION CALL
   }
+
+
+//----------------------------------------FCM NOTIFICATION USING CLOUD FIRESTORE------------------------------------------
+Future<void> saveFcmToken() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
+
+  final messaging = FirebaseMessaging.instance;
+
+  //Request permission
+  await messaging.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  final token = await messaging.getToken();
+  if (token == null) return;
+
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(user.uid)
+      .set(
+    {'fcmToken': token},
+    SetOptions(merge: true), // SAFE UPDATE
+  );
+
+  debugPrint("FCM Token saved: $token");
+}
+
+
 
   /// Fetch users from Firestore
   Future<void> fetchMembers() async {
@@ -94,6 +128,7 @@ class _AddExpenseUIState extends State<AddExpenseUI> {
         'absentMembers': absentMembers.toList(),
         'splitDetails': splitDetails,
       });
+
 
       AppSnackbar.success("Success", "Expense added successfully");
 

@@ -11,6 +11,7 @@ import 'package:expence_tracker/DashboardModuleScreens/roommates_memeber_screen.
 import 'package:expence_tracker/DashboardModuleScreens/settings_screen.dart';
 import 'package:expence_tracker/DashboardModuleScreens/settlement_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 
@@ -24,6 +25,8 @@ void main() async {
       projectId: "expensetracker-9d82c",
     ),
   );
+  final fcmToken = await FirebaseMessaging.instance.getToken();
+  debugPrint("FCMToken $fcmToken");
   runApp(MyApp());
 }
 
