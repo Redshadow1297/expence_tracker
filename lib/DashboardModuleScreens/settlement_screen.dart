@@ -195,6 +195,7 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
                   const SizedBox(height: 8),
                   const Text("Absent Members", style: TextStyle(fontWeight: FontWeight.bold)),
                   ...absentMembers.map((uid) => Text("$uid : ₹0")),
+                  const SizedBox(height: 8,),
                 ],
               ),
             ),

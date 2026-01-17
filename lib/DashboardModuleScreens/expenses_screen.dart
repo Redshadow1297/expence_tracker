@@ -33,22 +33,28 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
   }
 
-  List<QueryDocumentSnapshot> _filterByMonth(
-    List<QueryDocumentSnapshot> docs,
-  ) {
+  List<QueryDocumentSnapshot> _filterByMonth(List<QueryDocumentSnapshot> docs) {
     final parts = selectedMonth.split('-');
     final month = int.parse(parts[0]);
     final year = int.parse(parts[1]);
 
     return docs.where((doc) {
-      final date = (doc['expenseDate'] as Timestamp).toDate();
+      if (!doc.data().toString().contains('expenseDate')) return false;
+
+      final rawDate = doc['expenseDate'];
+
+      if (rawDate == null || rawDate is! Timestamp) return false;
+
+      final date = rawDate.toDate();
+
       return date.month == month && date.year == year;
     }).toList();
   }
 
   Widget _expenseTile(Map<String, dynamic> data) {
-    final date =
-        DateFormat('dd MMM yyyy').format((data['expenseDate'] as Timestamp).toDate());
+    final date = DateFormat(
+      'dd MMM yyyy',
+    ).format((data['expenseDate'] as Timestamp).toDate());
 
     return Card(
       elevation: 2,
@@ -58,7 +64,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         leading: CircleAvatar(
           radius: 18,
           backgroundColor: Colors.deepPurple.shade100,
-          child: const Icon(Icons.receipt, color: Colors.deepPurple),
+          child: const Icon(Icons.receipt, color: Colors.blueGrey),
         ),
         title: Text(
           data['title'] ?? '',
@@ -67,10 +73,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         subtitle: Text("${data['category']} • $date"),
         trailing: Text(
           "₹${data['amount']}",
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ),
     );
@@ -95,7 +98,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('expenses')
-            .where('uId', isEqualTo: userId)
+            .where('paidBy', isEqualTo: userId)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -108,7 +111,16 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
             );
           }
 
+          // final filteredDocs = _filterByMonth(snapshot.data!.docs);
           final filteredDocs = _filterByMonth(snapshot.data!.docs);
+          if (filteredDocs.isEmpty) {
+            return const Center(
+              child: Text(
+                "No expenses for selected month",
+                style: TextStyle(fontSize: 16),
+              ),
+            );
+          }
 
           final totalSpent = filteredDocs.fold<double>(
             0,
@@ -118,7 +130,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // 🔹 Header Summary
               Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
@@ -128,7 +139,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      const Icon(Icons.bar_chart, size: 36, color: Color(0xFF097D94)),
+                      const Icon(
+                        Icons.bar_chart,
+                        size: 36,
+                        color: Color(0xFF097D94),
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -145,14 +160,17 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               ),
               const SizedBox(height: 16),
 
-              // 🔹 Month Filter
+              // Month Filter
               Card(
                 elevation: 2,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -167,7 +185,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               ),
               const SizedBox(height: 16),
 
-              // 🔹 Total Spent
+              //  Total Spent
               Card(
                 elevation: 4,
                 color: Colors.green.shade600,
@@ -198,7 +216,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               ),
               const SizedBox(height: 24),
 
-              // 🔹 Recent Expenses
+              //  Recent Expenses
               const Text(
                 "Recent Expenses",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),

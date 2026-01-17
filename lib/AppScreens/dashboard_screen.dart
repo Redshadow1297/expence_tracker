@@ -21,48 +21,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {"title": "Profile", "icon": Icons.person, "route": "/profile"},
     {"title": "Roommates", "icon": Icons.group, "route": "/roommates"},
     {"title": "Expenses", "icon": Icons.receipt_long, "route": "/showexpenses"},
-    {"title": "Settlements", "icon": Icons.account_balance_wallet, "route": "/settlements"},
+    {
+      "title": "Settlements",
+      "icon": Icons.account_balance_wallet,
+      "route": "/settlements",
+    },
     {"title": "Reports", "icon": Icons.bar_chart, "route": "/reports"},
     {"title": "Settings", "icon": Icons.settings, "route": "/forgetPassword"},
   ];
 
-
   @override
-void initState() {
-  super.initState();
-  initFCM();
-}
+  void initState() {
+    super.initState();
+    initFCM();
+  }
 
+  //---------------------------------- FCM Initialization ------------------
 
+  Future<void> initFCM() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-//---------------------------------- FCM Initialization ------------------
+    await messaging.requestPermission(alert: true, badge: true, sound: true);
 
-Future<void> initFCM() async {
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
+    final token = await messaging.getToken();
+    if (token == null) return;
 
-  await messaging.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
 
-  final token = await messaging.getToken();
-  if (token == null) return;
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      'fcmToken': token,
+    }, SetOptions(merge: true));
 
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return;
-
-  await FirebaseFirestore.instance
-      .collection('users')
-      .doc(user.uid)
-      .set(
-    {'fcmToken': token},
-    SetOptions(merge: true),
-  );
-
-  debugPrint("FCM Token saved");
-}
-
+    debugPrint("FCM Token saved");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +86,7 @@ Future<void> initFCM() async {
     );
   }
 
-  // 🔹 Welcome Card
+  //  Welcome Card
   Widget _welcomeCard() {
     return Card(
       elevation: 4,
@@ -120,7 +112,7 @@ Future<void> initFCM() async {
     );
   }
 
-  // 🔹 Quick Actions
+  //  Quick Actions
   Widget _quickActions() {
     return Row(
       children: [
@@ -153,7 +145,15 @@ Future<void> initFCM() async {
   }) {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
-      onTap: () => Get.toNamed(route),
+      onTap: () {
+        if (Get.isBottomSheetOpen == true) {
+          Get.back(); // close bottom sheet
+          Future.microtask(() => Get.toNamed(route));
+        } else {
+          Get.toNamed(route);
+        }
+      },
+
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -177,7 +177,7 @@ Future<void> initFCM() async {
     );
   }
 
-  // 🔹 Module List Tile
+  //  Module List Tile
   Widget _moduleTile(Map<String, dynamic> module) {
     return Card(
       elevation: 2,
@@ -190,30 +190,40 @@ Future<void> initFCM() async {
           style: const TextStyle(fontWeight: FontWeight.w500),
         ),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: () => Get.toNamed(module['route']),
+        onTap: () {
+          if (Get.isBottomSheetOpen == true) {
+            Get.back();
+            Future.microtask(() => Get.toNamed(module['route']));
+          } else {
+            Get.toNamed(module['route']);
+          }
+        },
       ),
     );
   }
 
-  // 🔹 ChatBot Bottom Sheet
+  //  ChatBot Bottom Sheet
   void _openChatBot() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) {
+      builder: (sheetContext) {
         return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.7,
+          height: MediaQuery.of(context).size.height * 0.3,
           child: ChatBotWidget(
             apiKey: 'YOUR_GEMINI_API_KEY',
             aiService: AIService.gemini,
             initialMessage:
-                " Hi! I can help you with expenses, settlements, and reports.",
+                "Hi! I can help you with expenses, settlements, and reports.",
             primaryColor: const Color(0xFF097D94),
             headerTitle: 'Expense Assistant',
             headerIcon: Icons.smart_toy,
+            chatIcon: Icons.chat_bubble_rounded,
           ),
         );
       },

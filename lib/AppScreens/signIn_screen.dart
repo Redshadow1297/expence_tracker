@@ -180,7 +180,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               children: [
                 SizedBox(height: 20),
                 AppLabel.title(
-                  "Welcome to Legends Empire !",
+                  "Welcome !",
                   Colors.lightBlueAccent,
                 ),
                 SizedBox(height: 20),
