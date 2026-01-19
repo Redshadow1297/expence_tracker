@@ -34,6 +34,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     initFCM();
+    getPresentDays();
+    getTotalExpense();
   }
 
   //---------------------------------- FCM Initialization ------------------
@@ -56,6 +58,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
     debugPrint("FCM Token saved");
   }
 
+  // -------------------------------------- User Details To show On Dashboard -------------------------------------
+  Future<int> getPresentDays() async {
+    final user = FirebaseAuth.instance.currentUser!;
+    final snapshot = await FirebaseFirestore.instance
+        .collection('expenses')
+        .where('presentMembers', arrayContains: user.uid)
+        .get();
+
+    final uniqueDays = snapshot.docs.map((doc) {
+      final ts = doc['expenseDate'] as Timestamp;
+      final d = ts.toDate();
+      return "${d.year}-${d.month}-${d.day}";
+    }).toSet();
+
+    return uniqueDays.length;
+  }
+
+  Future<double> getTotalExpense() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) throw Exception("User not logged in");
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection('expenses')
+        .where('presentMembers', arrayContains: user.uid)
+        .get();
+
+    double total = 0;
+    for (var doc in snapshot.docs) {
+      total += (doc['amount'] as num).toDouble();
+    }
+
+    return total;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,9 +106,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           _welcomeCard(),
           const SizedBox(height: 20),
+          AppLabel.title("Quick View", Colors.indigoAccent),
+           const SizedBox(height: 12),
+          _userDetails(),
+          const SizedBox(height: 24),
+          AppLabel.title("Things You Can Do", Colors.indigoAccent),
+          const SizedBox(height: 12),
           _quickActions(),
           const SizedBox(height: 24),
-          AppLabel.title("More Options", Colors.indigoAccent),
+          AppLabel.title("Explore More", Colors.indigoAccent),
           const SizedBox(height: 12),
           ...modules.map(_moduleTile).toList(),
         ],
@@ -112,6 +154,94 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  //User Details On Dashboard
+  Widget _userDetails() {
+    return FutureBuilder(
+      future: Future.wait([getPresentDays(), getTotalExpense()]),
+      builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Text(
+            snapshot.error.toString(),
+            style: const TextStyle(color: Colors.red),
+          );
+        }
+
+        final presentDays = snapshot.data![0];
+        final totalExpense = snapshot.data![1];
+        return Row(
+          children: [
+            Expanded(
+              child: _dashboardCard(
+                title: "$presentDays",
+                subtitle: "Present Days",
+                icon: Icons.calendar_today,
+                colors:[Color(0xFFB993D6), Color(0xFF8CA6DB)],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _dashboardCard(
+                title: "$totalExpense",
+                subtitle: "Individual Expense",
+                icon: Icons.currency_rupee,
+                colors: [Color(0xFFB993D6), Color(0xFF8CA6DB)],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _dashboardCard({
+    required String title,
+    required String subtitle,
+    required List<Color> colors,
+    IconData? icon,
+  }) {
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: colors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) Icon(icon, color: Colors.white, size: 24),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 21,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white.withOpacity(0.9),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   //  Quick Actions
   Widget _quickActions() {
     return Row(
@@ -131,6 +261,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             icon: Icons.swap_horiz,
             color: Colors.orange,
             route: "/settlements",
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _quickActionCard(
+            title: "Reports",
+            icon: Icons.swap_horiz,
+            color: Colors.blueGrey,
+            route: "/reports",
           ),
         ),
       ],
@@ -153,7 +292,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Get.toNamed(route);
         }
       },
-
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
