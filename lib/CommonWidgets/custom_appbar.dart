@@ -25,15 +25,16 @@ class CustomAppBar extends StatelessWidget
             style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
-              fontWeight: FontWeight.bold,
+              fontFamily: 'Poppins-Bold'
             ),
           ),
           const SizedBox(height: 4),
           Text(
             subTitle,
             style: const TextStyle(
-              fontSize: 13,
+              fontSize: 15,
               color: Colors.white70,
+              fontFamily: 'PoppinsSemiBold'
             ),
           ),
         ],

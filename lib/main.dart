@@ -33,15 +33,17 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      initialRoute: '/',
+      debugShowCheckedModeBanner: false,
+
+      initialRoute: '/Splashscreen',
+
       getPages: [
         GetPage(name: '/Splashscreen', page: () => ExpenseSplash()),
         GetPage(name: '/LoginPage', page: () => LoginScreen()),
-        GetPage(name: '/forgetPassword', page:() => ChangePasswordScreen()),
+        GetPage(name: '/forgetPassword', page: () => ChangePasswordScreen()),
         GetPage(name: '/signIn', page: () => SignUpScreen()),
         GetPage(name: '/dashboard', page: () => DashboardScreen()),
         GetPage(name: '/profile', page: () => UserProfileScreen()),
@@ -52,11 +54,22 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/reports', page: () => ReportScreen()),
         GetPage(name: '/settings', page: () => Settings()),
       ],
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.system, //auto theme mode
+
+      theme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.light,
+        fontFamily: 'Poppins',
+      ),
+
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        fontFamily: 'Poppins',
+      ),
+
+      themeMode: ThemeMode.system,//Auto theme as per system settings
       home: ExpenseSplash(),
     );
   }
 }
+

@@ -51,34 +51,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     }).toList();
   }
 
-  Widget _expenseTile(Map<String, dynamic> data) {
-    final date = DateFormat(
-      'dd MMM yyyy',
-    ).format((data['expenseDate'] as Timestamp).toDate());
-
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        leading: CircleAvatar(
-          radius: 18,
-          backgroundColor: Colors.deepPurple.shade100,
-          child: const Icon(Icons.receipt, color: Colors.blueGrey),
-        ),
-        title: Text(
-          data['title'] ?? '',
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text("${data['category']} • $date"),
-        trailing: Text(
-          "₹${data['amount']}",
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final userId = FirebaseAuth.instance.currentUser!.uid;
@@ -146,13 +118,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Text(
-                          "Overview of your monthly expenses",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child: 
+                        AppLabel.body("Overview of your monthly expenses", Colors.black),
                       ),
                     ],
                   ),
@@ -174,10 +141,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        "Select Month",
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
+                      AppLabel.caption("Select Month", Colors.black),
                       _monthDropdown(),
                     ],
                   ),
@@ -197,10 +161,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Total Spent",
-                        style: TextStyle(color: Colors.white70),
-                      ),
+                      AppLabel.caption("Total Spent", Colors.white),
                       const SizedBox(height: 8),
                       Text(
                         "₹${totalSpent.toStringAsFixed(2)}",
@@ -217,10 +178,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               const SizedBox(height: 24),
 
               //  Recent Expenses
-              const Text(
-                "Recent Expenses",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+              AppLabel.title("Recent Expenses", Colors.black),
               const SizedBox(height: 12),
               ...filteredDocs.map(
                 (doc) => _expenseTile(doc.data() as Map<String, dynamic>),
@@ -229,6 +187,33 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _expenseTile(Map<String, dynamic> data) {
+    final date = DateFormat(
+      'dd MMM yyyy',
+    ).format((data['expenseDate'] as Timestamp).toDate());
+
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: CircleAvatar(
+          radius: 18,
+          backgroundColor: Colors.deepPurple.shade100,
+          child: const Icon(Icons.receipt, color: Colors.blueGrey),
+        ),
+        title: 
+        AppLabel.body(data['title'] ??'', Colors.black),
+        
+        subtitle: Text("${data['category']} • $date"),
+        trailing: Text(
+          "₹${data['amount']}",
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
       ),
     );
   }

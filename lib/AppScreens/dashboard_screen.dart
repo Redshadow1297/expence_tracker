@@ -35,11 +35,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     initFCM();
     getPresentDays();
-    getTotalExpense();
+    getIndividualTotalExpense();
   }
 
   //---------------------------------- FCM Initialization ------------------
-
   Future<void> initFCM() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
 
@@ -55,42 +54,71 @@ class _DashboardScreenState extends State<DashboardScreen> {
       'fcmToken': token,
     }, SetOptions(merge: true));
 
-    debugPrint("FCM Token saved");
+    debugPrint("FCM Token saved  $token");
   }
 
   // -------------------------------------- User Details To show On Dashboard -------------------------------------
-  Future<int> getPresentDays() async {
-    final user = FirebaseAuth.instance.currentUser!;
-    final snapshot = await FirebaseFirestore.instance
-        .collection('expenses')
-        .where('presentMembers', arrayContains: user.uid)
-        .get();
+  Stream<int> getPresentDays() {
+  final user = FirebaseAuth.instance.currentUser!;
 
-    final uniqueDays = snapshot.docs.map((doc) {
-      final ts = doc['expenseDate'] as Timestamp;
-      final d = ts.toDate();
-      return "${d.year}-${d.month}-${d.day}";
-    }).toSet();
+  return FirebaseFirestore.instance
+      .collection('expenses')
+      .where('presentMembers', arrayContains: user.uid)
+      .snapshots()
+      .map((snapshot) {
+        final uniqueDays = snapshot.docs.map((doc) {
+          final ts = doc['expenseDate'] as Timestamp;
+          final d = ts.toDate();
+          return "${d.year}-${d.month}-${d.day}";
+        }).toSet();
 
-    return uniqueDays.length;
-  }
+        return uniqueDays.length;
+      });
+}
+  // Future<int> getPresentDays() async {                                                      //Future Builder
+  //   final user = FirebaseAuth.instance.currentUser!;
+  //   final snapshot = await FirebaseFirestore.instance
+  //       .collection('expenses')
+  //       .where('presentMembers', arrayContains: user.uid)
+  //       .get();
+  //   final uniqueDays = snapshot.docs.map((doc) {
+  //     final ts = doc['expenseDate'] as Timestamp;
+  //     final d = ts.toDate();
+  //     return "${d.year}-${d.month}-${d.day}";
+  //   }).toSet();
+  //   return uniqueDays.length;
+  // }
 
-  Future<double> getTotalExpense() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) throw Exception("User not logged in");
+  Stream<double> getIndividualTotalExpense() {
+  final user = FirebaseAuth.instance.currentUser!;
 
-    final snapshot = await FirebaseFirestore.instance
-        .collection('expenses')
-        .where('presentMembers', arrayContains: user.uid)
-        .get();
+  return FirebaseFirestore.instance
+      .collection('expenses')
+      .where('members.${user.uid}', isGreaterThan: 0)
+      .snapshots()
+      .map((snapshot) {
+        double total = 0;
 
-    double total = 0;
-    for (var doc in snapshot.docs) {
-      total += (doc['amount'] as num).toDouble();
-    }
+        for (var doc in snapshot.docs) {
+          total += (doc['members'][user.uid] as num).toDouble();
+        }
+        return total;
+      });
+}
 
-    return total;
-  }
+  // Future<double> getTotalExpense() async {                             //FututreBuilder
+  //   final user = FirebaseAuth.instance.currentUser;
+  //   if (user == null) throw Exception("User not logged in");
+  //   final snapshot = await FirebaseFirestore.instance
+  //       .collection('expenses')
+  //       .where('presentMembers', arrayContains: user.uid)
+  //       .get();
+  //   double total = 0;
+  //   for (var doc in snapshot.docs) {
+  //     total += (doc['amount'] as num).toDouble();
+  //   }
+  //   return total;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -106,16 +134,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
         children: [
           _welcomeCard(),
           const SizedBox(height: 20),
-          AppLabel.title("Quick View", Colors.indigoAccent),
+          AppLabel.title("Quick View", Colors.black,),
            const SizedBox(height: 12),
           _userDetails(),
           const SizedBox(height: 24),
-          AppLabel.title("Things You Can Do", Colors.indigoAccent),
+          AppLabel.title("Things You Can Do", Colors.black),
           const SizedBox(height: 12),
           _quickActions(),
           const SizedBox(height: 24),
-          AppLabel.title("Explore More", Colors.indigoAccent),
-          const SizedBox(height: 12),
+          AppLabel.title("Explore More", Colors.black),
+          const SizedBox(height: 12), 
           ...modules.map(_moduleTile).toList(),
         ],
       ),
@@ -140,12 +168,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const Icon(Icons.dashboard, size: 40, color: Color(0xFF097D94)),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                "Welcome \nManage your room expenses smartly",
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+              child :AppLabel.caption(
+                "Welcome \nManage your room expenses smartly",Colors.black
               ),
             ),
           ],
@@ -156,45 +180,91 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   //User Details On Dashboard
   Widget _userDetails() {
-    return FutureBuilder(
-      future: Future.wait([getPresentDays(), getTotalExpense()]),
-      builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Text(
-            snapshot.error.toString(),
-            style: const TextStyle(color: Colors.red),
-          );
-        }
+  return StreamBuilder<QuerySnapshot>(
+    stream: FirebaseFirestore.instance
+        .collection('expenses')
+        .where('presentMembers',
+            arrayContains: FirebaseAuth.instance.currentUser!.uid)
+        .snapshots(),
+    builder: (context, snapshot) {
+      if (!snapshot.hasData) {
+        return const Center(child: CircularProgressIndicator());
+      }
 
-        final presentDays = snapshot.data![0];
-        final totalExpense = snapshot.data![1];
-        return Row(
-          children: [
-            Expanded(
-              child: _dashboardCard(
-                title: "$presentDays",
-                subtitle: "Present Days",
-                icon: Icons.calendar_today,
-                colors:[Color(0xFFB993D6), Color(0xFF8CA6DB)],
-              ),
+      double totalExpense = 0;
+      final Set<String> uniqueDays = {};
+
+      for (var doc in snapshot.data!.docs) {
+        totalExpense += (doc['amount'] as num).toDouble();
+
+        final ts = doc['expenseDate'] as Timestamp;
+        final d = ts.toDate();
+        uniqueDays.add("${d.year}-${d.month}-${d.day}");
+      }
+
+      return Row(
+        children: [
+          Expanded(
+            child: _dashboardCard(
+              title: "${uniqueDays.length}",
+              subtitle: "Present Days",
+              icon: Icons.calendar_today,
+              colors: [Color(0xFFB993D6), Color(0xFF8CA6DB)],
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _dashboardCard(
-                title: "$totalExpense",
-                subtitle: "Individual Expense",
-                icon: Icons.currency_rupee,
-                colors: [Color(0xFFB993D6), Color(0xFF8CA6DB)],
-              ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _dashboardCard(
+              title: "₹ $totalExpense",
+              subtitle: "Total Expense",
+              icon: Icons.currency_rupee,
+              colors: [Color(0xFFB993D6), Color(0xFF8CA6DB)],
             ),
-          ],
-        );
-      },
-    );
-  }
+          ),
+        ],
+      );
+    },
+  );
+}
+  // Widget _userDetails() {                                                        //Future Builder
+  //   return FutureBuilder(
+  //     future: Future.wait([getPresentDays(), getTotalExpense()]),
+  //     builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+  //       if (snapshot.connectionState == ConnectionState.waiting) {
+  //         return const Center(child: CircularProgressIndicator());
+  //       }
+  //       if (snapshot.hasError) {
+  //         return Text(
+  //           snapshot.error.toString(),
+  //           style: const TextStyle(color: Colors.red),
+  //         );
+  //       }
+  //       final presentDays = snapshot.data![0];
+  //       final totalExpense = snapshot.data![1];
+  //       return Row(
+  //         children: [
+  //           Expanded(
+  //             child: _dashboardCard(
+  //               title: "$presentDays",
+  //               subtitle: "Present Days",
+  //               icon: Icons.calendar_today,
+  //               colors:[Color(0xFFB993D6), Color(0xFF8CA6DB)],
+  //             ),
+  //           ),
+  //           const SizedBox(width: 10),
+  //           Expanded(
+  //             child: _dashboardCard(
+  //               title: "$totalExpense",
+  //               subtitle: "Total Expense",
+  //               icon: Icons.currency_rupee,
+  //               colors: [Color(0xFFB993D6), Color(0xFF8CA6DB)],
+  //             ),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   Widget _dashboardCard({
     required String title,
@@ -220,22 +290,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             if (icon != null) Icon(icon, color: Colors.white, size: 24),
             const SizedBox(height: 6),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 21,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
+            AppLabel.title(title,Colors.white),
             const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white.withOpacity(0.9),
-              ),
-            ),
+            AppLabel.caption(subtitle,Colors.white),
           ],
         ),
       ),
@@ -292,24 +349,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Get.toNamed(route);
         }
       },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 32, color: Colors.white),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+      child: Card(
+        elevation: 5,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+            colors: [
+              color.withOpacity(0.7),
+              color,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, size: 31, color: Colors.white),
+              const SizedBox(height: 8),
+              AppLabel.caption(title, Colors.white),
+            ],
+          ),
         ),
       ),
     );
@@ -323,10 +386,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: Icon(module['icon'], color: const Color(0xFF097D94)),
-        title: Text(
-          module['title'],
-          style: const TextStyle(fontWeight: FontWeight.w500),
-        ),
+        title: 
+        AppLabel.caption(module['title'], Colors.black),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: () {
           if (Get.isBottomSheetOpen == true) {

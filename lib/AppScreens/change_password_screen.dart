@@ -1,4 +1,5 @@
 import 'package:expence_tracker/CommonWidgets/app_buittons.dart';
+import 'package:expence_tracker/CommonWidgets/app_lables.dart';
 import 'package:expence_tracker/CommonWidgets/app_snackbars.dart';
 import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
@@ -99,7 +100,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         ],
       ),
       child: Row(
-        children: const [
+        children:  [
           CircleAvatar(
             radius: 24,
             backgroundColor: Color(0xFFEEF2FF),
@@ -107,10 +108,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           ),
           SizedBox(width: 12),
           Expanded(
-            child: Text(
-              "Use a strong password to protect your expenses & data",
-              style: TextStyle(fontSize: 13, color: Colors.grey),
-            ),
+            child: 
+            AppLabel.caption("Use a strong password to protect your expenses & data", Colors.grey),
           ),
         ],
       ),

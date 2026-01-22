@@ -4,22 +4,22 @@ class AppLabel extends StatelessWidget {
   final String text;
   final TextStyle style;
   const AppLabel._(this.text, this.style);
-  factory AppLabel.body(String text, Color white) {
+  factory AppLabel.body(String text, Color txt_color) {
     return AppLabel._(
       text,
-      const TextStyle(fontSize: 14),
+      TextStyle(fontSize: 16, fontFamily: 'Poppins-Regular',fontWeight: FontWeight.bold,color: txt_color),
     );
   }
-  factory AppLabel.title(String text, MaterialAccentColor lightBlueAccent) {
+  factory AppLabel.title(String text,Color txt_color) {
     return AppLabel._(
       text,
-      const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      TextStyle(fontSize: 18,color: txt_color, fontFamily: 'Poppins-Bold',fontWeight: FontWeight.bold),
     );
   }
-  factory AppLabel.caption(String text, MaterialColor grey) {
+  factory AppLabel.caption(String text, Color txt_color) {
     return AppLabel._(
       text,
-      const TextStyle(fontSize: 12, color: Colors.grey),
+      TextStyle(fontSize: 14, color: txt_color,fontFamily: 'Poppins-SemiBold',fontWeight: FontWeight.bold),
     );
   }
   @override

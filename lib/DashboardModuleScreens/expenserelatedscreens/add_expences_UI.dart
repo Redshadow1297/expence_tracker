@@ -68,8 +68,6 @@ Future<void> saveFcmToken() async {
   debugPrint("FCM Token saved: $token");
 }
 
-
-
   /// Fetch users from Firestore
   Future<void> fetchMembers() async {
     final snapshot = await _firestore.collection('users').get();

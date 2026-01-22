@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expence_tracker/CommonWidgets/app_lables.dart';
 import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 
@@ -78,28 +79,10 @@ class _RoomMembersState extends State<RoomMembers> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "${member['firstName'] ?? ''} ${member['lastName'] ?? ''}",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
+                              AppLabel.body("${member['firstName'] ?? ''} ${member['lastName'] ?? ''}",Colors.black),
                               const SizedBox(height: 4),
-                              Text(
-                                "Email: ${member['emailId'] ?? 'N/A'}",
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              Text(
-                                "Contact: ${member['mobileNumber'] ?? 'N/A'}",
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black87,
-                                ),
-                              ),
+                              AppLabel.caption("Email : ${member['emailId'] ?? 'N/A'}",Colors.indigo),
+                              AppLabel.caption("Contact : ${member['mobileNumber'] ?? 'N/A'}",Colors.indigo)
                             ],
                           ),
                         ),

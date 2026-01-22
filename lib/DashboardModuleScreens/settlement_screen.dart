@@ -56,11 +56,11 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
                   children: [
                     _summaryCard(filteredDocs),
                     const SizedBox(height: 20),
-                    AppLabel.title("All Expenses", Colors.purpleAccent),
+                    AppLabel.title("All Expenses", Colors.black87),
                     const SizedBox(height: 10),
                     ..._expenseCards(filteredDocs),
                     const SizedBox(height: 30),
-                    AppLabel.title("Settlements", Colors.purpleAccent),
+                    AppLabel.title("Settlements", Colors.black87),
                     const SizedBox(height: 10),
                     ..._settlementCards(filteredDocs),
                   ],
@@ -146,10 +146,10 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
                   color: Colors.white,
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins-Bold',
                 )),
             const SizedBox(height: 6),
-            Text("Members: ${members.length}",
-                style: const TextStyle(color: Colors.white70)),
+            AppLabel.caption("Members : ${members.length}", Colors.white70),
           ],
         ),
       ),
@@ -176,7 +176,7 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
         margin: const EdgeInsets.symmetric(vertical: 6),
         child: ExpansionTile(
           leading: const Icon(Icons.receipt_long, color: Colors.deepPurple),
-          title: AppLabel.body(category, Colors.black),
+          title: AppLabel.caption(category, Colors.black),
           subtitle: AppLabel.caption(
               date != null ? date.toString().split(' ')[0] : 'N/A',
               Colors.grey),
@@ -187,13 +187,13 @@ class _SettlementsScreenState extends State<SettlementsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Present Members", style: TextStyle(fontWeight: FontWeight.bold)),
+                  AppLabel.caption("Present Members", Colors.black54),
                   ...presentMembers.map((uid) {
                     final amt = splitDetails[uid]?.toDouble() ?? 0;
                     return Text("$uid : ₹$amt");
                   }),
                   const SizedBox(height: 8),
-                  const Text("Absent Members", style: TextStyle(fontWeight: FontWeight.bold)),
+                  AppLabel.caption("Absent Members", Colors.black54),
                   ...absentMembers.map((uid) => Text("$uid : ₹0")),
                   const SizedBox(height: 8,),
                 ],

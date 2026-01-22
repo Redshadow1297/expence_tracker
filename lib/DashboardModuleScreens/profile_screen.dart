@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expence_tracker/CommonWidgets/app_buittons.dart';
+import 'package:expence_tracker/CommonWidgets/app_lables.dart';
 import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -162,14 +163,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.indigo,
-            ),
-          ),
+          AppLabel.body(title, Colors.indigo),
           const SizedBox(height: 12),
           ...children,
         ],
@@ -186,21 +180,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           Icon(icon, size: 20, color: Colors.indigo),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 13,
-              ),
-            ),
+            child: 
+            AppLabel.caption(label, Colors.grey),
           ),
-          Text(
-            value?.toString() ?? "-",
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-            ),
-          ),
+          AppLabel.caption(value?.toString() ?? "-", Colors.black),
         ],
       ),
     );
