@@ -68,6 +68,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                               userData?['emailId']),
                           infoTile(Icons.phone_android, "Mobile",
                               userData?['mobileNumber']),
+                          infoTile(Icons.badge, "Aadhar Number",
+                              userData?['adhaarNumber']),
                         ],
                       ),
                       const SizedBox(height: 16),

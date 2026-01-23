@@ -5,6 +5,7 @@ import 'package:expence_tracker/CommonWidgets/app_lables.dart';
 import 'package:expence_tracker/CommonWidgets/app_snackbars.dart';
 import 'package:expence_tracker/CommonWidgets/custom_appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -39,6 +40,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
       });
     }
   }
+
+   //---------------------------------- FCM Initialization ------------------
+  Future<void> initFCM() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    await messaging.requestPermission(alert: true, badge: true, sound: true);
+
+    final token = await messaging.getToken();
+    if (token == null) return;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      'fcmToken': token,
+    }, SetOptions(merge: true));
+
+    debugPrint("FCM Token saved  $token");
+  }
+  
 
   Future<String?> uploadProfilePic(String uid) async {
     Get.snackbar("InProgress", "Image Uploading Under Development .");

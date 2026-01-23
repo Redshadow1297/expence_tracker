@@ -132,7 +132,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
            const SizedBox(height: 12),
           _userDetails(),
           const SizedBox(height: 24),
-          AppLabel.title("Things You Can Do", Colors.black),
+          AppLabel.title("Quick Actions", Colors.black),
           const SizedBox(height: 12),
           _quickActions(),
           const SizedBox(height: 24),
@@ -295,35 +295,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   //  Quick Actions
   Widget _quickActions() {
-    return Row(
-      children: [
-        Expanded(
-          child: _quickActionCard(
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _quickActionCard(
             title: "Add Expense",
             icon: Icons.add,
             color: Colors.green,
             route: "/addexpenses",
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _quickActionCard(
+          const SizedBox(width: 12),
+          _quickActionCard(
             title: "Settlements",
             icon: Icons.swap_horiz,
             color: Colors.orange,
             route: "/settlements",
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _quickActionCard(
+          const SizedBox(width: 12),
+          _quickActionCard(
             title: "Reports",
             icon: Icons.swap_horiz,
             color: Colors.blueGrey,
             route: "/reports",
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -344,16 +341,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
         }
       },
       child: Card(
+        shadowColor: color.withOpacity(0.9),
         elevation: 5,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
+          width: 150,
+          height: 120,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(16),
             gradient: LinearGradient(
             colors: [
-              color.withOpacity(0.7),
+              color.withOpacity(0.5),
               color,
             ],
             begin: Alignment.topLeft,

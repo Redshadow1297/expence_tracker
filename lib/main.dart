@@ -25,8 +25,8 @@ void main() async {
       projectId: "expensetracker-9d82c",
     ),
   );
-  // final fcmToken = await FirebaseMessaging.instance.getToken();
-  // debugPrint("FCMToken $fcmToken");
+  final fcmToken = await FirebaseMessaging.instance.getToken();
+  debugPrint("FCMToken $fcmToken");
   runApp(MyApp());
 }
 
